@@ -794,7 +794,7 @@
                     <tr><td class="bio-label">Jabatan Utama</td><td class="bio-val" id="bio-jabatan">-</td></tr>
                     <tr><td class="bio-label">Tugas Tambahan</td><td class="bio-val" id="bio-tugas">-</td></tr>
                     <tr><td class="bio-label">Status Kepegawaian</td><td class="bio-val" id="bio-status">-</td></tr>
-                    <tr><td class="bio-label">TMT Sekolah</td><td class="bio-val" id="bio-tmt">-</td></tr>
+                    <tr><td class="bio-label">Mata Pelajaran</td><td class="bio-val" id="bio-tmt">-</td></tr>
                     <tr><td class="bio-label">Sertifikasi</td><td class="bio-val" id="bio-sertifikasi">-</td></tr>
                     <tr><td class="bio-label">Tempat/Tgl Lahir</td><td class="bio-val" id="bio-ttl">-</td></tr>
                     <tr><td class="bio-label">Jenis Kelamin</td><td class="bio-val" id="bio-jk">-</td></tr>
@@ -1460,7 +1460,7 @@ function tutupLaporan() {
                 document.getElementById("bio-jabatan").innerText = bio.jabatan || "-";
                 document.getElementById("bio-tugas").innerText = bio.tugasTambahan || "-";
                 document.getElementById("bio-status").innerText = bio.statusPegawai || "-";
-                document.getElementById("bio-tmt").innerText = formatTanggal(bio.tmt);
+                document.getElementById("bio-tmt").innerText = bio.tmt || "-";
                 document.getElementById("bio-sertifikasi").innerText = bio.sertifikasi || "-";
                 
                 let ttl = (bio.tempatLahir || "") + ", " + formatTanggal(bio.tglLahir);
