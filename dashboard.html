@@ -1151,10 +1151,11 @@ function updateHeaderDashboard() {
     // Kita buat ulang string pengecekannya di sini agar aman:
     let stringCekJabatan = (bio.jabatan + " " + bio.tugasTambahan).toUpperCase();
 
-    // 1. Cek Waka Kurikulum
+    // 1. Cek Waka Kurikulum ATAU Ketua Paralel
     if (tombolAbsenKaryawan) {
-        if (stringCekJabatan.includes("KURIKULUM")) {
-            tombolAbsenKaryawan.style.display = "block";
+        // Mengecek apakah string mengandung "KURIKULUM" ATAU "KETUA PARALEL"
+        if (stringCekJabatan.includes("KURIKULUM") || stringCekJabatan.includes("KETUA PARALEL")) {
+        tombolAbsenKaryawan.style.display = "block";
         } else {
             tombolAbsenKaryawan.style.display = "none";
         }
