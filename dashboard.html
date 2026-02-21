@@ -1260,12 +1260,20 @@ if (tombolT2Q) {
             }
 
             const bio = dataDariSpreadsheet.biodata[namaGuru];
-            let tugas = "";
-            if (bio && bio.tugasTambahan) {
-                tugas = bio.tugasTambahan.toLowerCase();
+            let teksPengecekan = "";
+            
+            if (bio) {
+                // AMANNYA: Kita gabungkan saja teks dari Jabatan Utama dan Tugas Tambahan
+                // (bio.jabatan / bio.jabatanUtama disesuaikan dengan pengiriman GS Anda)
+                let jabatan = bio.jabatan || bio.jabatanUtama || ""; 
+                let tugas = bio.tugasTambahan || "";
+                
+                // Jadikan huruf kecil semua agar mudah dicocokkan
+                teksPengecekan = (jabatan + " " + tugas).toLowerCase();
             }
 
-            if (tugas.includes("wali kelas")) {
+            // PERUBAHAN: Cek apakah di teks tersebut ada kata "wali kelas" ATAU "guru kelas"
+            if (teksPengecekan.includes("wali kelas") || teksPengecekan.includes("guru kelas")) {
                 window.open("https://aktechmaster.github.io/SD_Junral_Kehadiran_Siswa/");
             } else {
                 document.getElementById("modalPeringatan").style.display = "block";
