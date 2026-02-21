@@ -1212,20 +1212,23 @@ function updateHeaderDashboard() {
     }
 
     // ==========================================
-    // --- LOGIKA OTOMATIS MENU T2Q ---
-    // ==========================================
+// --- LOGIKA OTOMATIS MENU T2Q ---
+// ==========================================
 
-    const tombolT2Q = document.getElementById('menu-t2q');
+const tombolT2Q = document.getElementById('menu-t2q');
 
-    if (tombolT2Q) { 
-        let cekDataGuru = (bio.jabatan + " " + bio.tugasTambahan).toUpperCase();
+if (tombolT2Q) { 
+    // Kita ganti sumber datanya menjadi bio.mataPelajaran
+    // Tambahkan fallback (|| "") agar tidak error (null) jika guru tersebut tidak punya mapel
+    let mapelGuru = (bio.mataPelajaran || "").toUpperCase();
 
-        if (cekDataGuru.includes("T2Q") || cekDataGuru.includes("TAHSIN") || cekDataGuru.includes("TAHFIDZ")) {
-            tombolT2Q.style.display = "block"; 
-        } else {
-            tombolT2Q.style.display = "none"; 
-        }
+    // Pengecekan didasarkan pada variabel mapelGuru
+    if (mapelGuru.includes("T2Q") || mapelGuru.includes("TAHSIN") || mapelGuru.includes("TAHFIDZ")) {
+        tombolT2Q.style.display = "block"; 
+    } else {
+        tombolT2Q.style.display = "none"; 
     }
+}
 
     // ==========================================
     // --- LOGIKA OTOMATIS MENU BPI ---
