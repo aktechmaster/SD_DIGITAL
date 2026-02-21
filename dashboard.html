@@ -118,7 +118,7 @@
     padding: 40px;
     box-shadow: 0 10px 25px rgba(0,0,0,0.05);
     /* Gambar latar belakang tetap sama */
-    background-image: url('https://img.freepik.com/free-vector/abstract-blue-geometric-shapes-background_1035-17545.jpg');
+    background-image: ('https://img.freepik.com/free-vector/abstract-blue-geometric-shapes-background_1035-17545.jpg');
     background-size: cover;
     background-position: center;
     position: relative;
@@ -493,7 +493,7 @@
         </div>
 
         <div class="menu-grid">
-            <div class="menu-card" onclick="window.open('https://aktechmaster.github.io/SMP_Jurnal-Mengajar-Harian-New/')">
+            <div class="menu-card" onclick="window.open('https://aktechmaster.github.io/SD_Jurnal_Mengajar/')">
                 <h3>📅 Jurnal Harian</h3>
                 <p>Klik untuk input jurnal harian KBM.</p>
             </div>
@@ -1059,7 +1059,7 @@ function closeInfoPopup() {
         // 2. KONFIGURASI API
         // ==========================================
         
-        const API_URL = "https://script.google.com/macros/s/AKfycbyZKEYXblP_bpPvojEjemtvw0ozji2pp5wIv6igMSSdqj3ICm11F7BCr6NbqGzzfQxYfw/exec"; 
+        const API_ = "https://script.google.com/macros/s/AKfycbyZKEYXblP_bpPvojEjemtvw0ozji2pp5wIv6igMSSdqj3ICm11F7BCr6NbqGzzfQxYfw/exec"; 
 
         const namaGuru = localStorage.getItem('namaGuru'); 
 
@@ -1078,7 +1078,7 @@ function closeInfoPopup() {
 
             try {
                 console.log("Sedang mengambil data...");
-                const response = await fetch(API_URL);
+                const response = await fetch(API_);
                 const data = await response.json();
                 
                 dataDariSpreadsheet = data; 
@@ -1262,7 +1262,7 @@ function updateHeaderDashboard() {
             }
 
             if (tugas.includes("wali kelas")) {
-                window.open("https://aktechmaster.github.io/SMP_Jurnal-Kehadiran-Siswa/");
+                window.open("https://aktechmaster.github.io/SD_Junral_Kehadiran_Siswa/");
             } else {
                 document.getElementById("modalPeringatan").style.display = "block";
             }
@@ -1637,7 +1637,7 @@ function prosesUbahPassword() {
     formData.append('nama', namaGuru);
     formData.append('password', elPassBaru.value);
 
-    fetch(API_URL, { // Pastikan variabel API_URL benar
+    fetch(API_, { // Pastikan variabel API_ benar
         method: 'POST',
         body: formData
     })
@@ -1680,8 +1680,8 @@ function bukaPopupAbsensi() {
     var tbody = document.getElementById('isiTabelAbsensi');
     tbody.innerHTML = '<tr><td colspan="6" style="padding:20px; text-align:center;">Sedang mengambil data... <br>⏳ Mohon tunggu...</td></tr>';
 
-    // 3. URL SCRIPT (PASTIKAN SUDAH DEPLOY NEW VERSION & AKSES ANYONE)
-    // TEMPEL URL ANDA DI BAWAH INI ANTARA DUA TANDA KUTIP:
+    // 3.  SCRIPT (PASTIKAN SUDAH DEPLOY NEW VERSION & AKSES ANYONE)
+    // TEMPEL  ANDA DI BAWAH INI ANTARA DUA TANDA KUTIP:
     var urlTujuan = "https://script.google.com/macros/s/AKfycbzuguXclPQLd5v8qSz0xlVA_c4wWpqLoNloUO7bTa-jW6fv-h_-Cn236BwgbdwJjaL8/exec"; 
 
     // 4. Fetch Data
