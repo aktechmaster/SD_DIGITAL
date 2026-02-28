@@ -1,7 +1,7 @@
 {
-  "name": "Al-Kautsar Connect",
-  "short_name": "Portal Ortu",
-  "description": "Dashboard Wali Murid SMP IT Al-Kautsar",
+  "name": "DIGITAL SDIT",
+  "short_name": "DIGITAL",
+  "description": "Dashboard Informasi Guru Islam Terpadu Al-Kautsar",
   "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#f8fafc",
