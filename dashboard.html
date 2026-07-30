@@ -812,7 +812,7 @@
     </div>
     
     <div class="footer">
-            &copy; 2026 aktechmaster | Designed & Developed by aktechmaster
+            &copy; 2026 SDIIT Al-Kautsar | Designed & Developed by aktechmaster
     </div>
 
     <div id="modalPeringatan" class="modal">
@@ -1205,18 +1205,18 @@ function updateHeaderDashboard() {
     
     const tombolAbsensiSiswa = document.getElementById('menu-absensi-siswa');
 
-    if (tombolAbsensiSiswa) {
-        // Kita gunakan 'stringCekJabatan' yang sama.
-        // Logikanya: Jika jabatan mengandung kata "WALI KELAS", maka tampilkan.
-        // (Ini otomatis mencakup "WALI KELAS" dan "WAKIL WALI KELAS")
-        
-        if (stringCekJabatan.includes("WALI KELAS")) {
-            tombolAbsensiSiswa.style.display = "block";
-        } else {
-            tombolAbsensiSiswa.style.display = "none";
-        }
-    }
+if (tombolAbsensiSiswa) {
+    // 1. Daftar jabatan yang diizinkan melihat menu ini
+    const jabatanDiizinkan = ["WALI KELAS", "GURU KELAS"];
+    
+    const jabatanUpper = stringCekJabatan.toUpperCase();
 
+    // 2. Cek apakah salah satu kata kunci dari array ada di dalam 'stringCekJabatan'
+    const punyaAkses = jabatanDiizinkan.some(jabatan => jabatanUpper.includes(jabatan));
+
+    // 3. Tampilkan atau sembunyikan tombol
+    tombolAbsensiSiswa.style.display = punyaAkses ? "block" : "none";
+}
     // ==========================================
 // --- LOGIKA OTOMATIS MENU T2Q ---
 // ==========================================
@@ -1294,13 +1294,18 @@ if (tombolT2Q) {
         // ============================================
         // FUNGSI BUKA LAPORAN (VERSI TERBARU - 6 POIN)
         // ============================================
-function bukaLaporan() {
-    // 1. Cek apakah data dari server sudah masuk
+async function bukaLaporan() {
+    // 1. Panggil data terbaru dari server terlebih dahulu
+    // fetchData() sudah punya loading screen bawaan Anda, jadi user tahu sistem sedang bekerja
+    await fetchData(); 
+
+    // 2. Cek keamanan (berjaga-jaga jika fetch gagal)
     if (!dataDariSpreadsheet) {
-        showPopup("Loading", "Data sedang dimuat... Tunggu sebentar.", "⏳");
+        showPopup("Gagal", "Gagal memuat data terbaru. Coba lagi.", "❌");
         return;
     }
 
+    // 3. Buka Modal Laporan
     const modal = document.getElementById("modalLaporan");
     modal.style.display = "block";
 
@@ -1322,19 +1327,45 @@ function bukaLaporan() {
     }
 
     // --- BAGIAN 2: JURNAL BULANAN ---
-    const dataBulanan = dataDariSpreadsheet.jurnalBulanan[namaGuru];
-    if (dataBulanan) {
-        let target = parseInt(dataBulanan.target) || 0;
-        let realisasi = parseInt(dataBulanan.realisasi) || 0;
-        let persen = 0;
-        if (target > 0) persen = Math.round((realisasi / target) * 100);
+const dataBulanan = dataDariSpreadsheet.jurnalBulanan[namaGuru];
+if (dataBulanan) {
+    let target = parseInt(dataBulanan.target) || 0;
+    let realisasi = parseInt(dataBulanan.realisasi) || 0;
+    let persen = 0;
+    if (target > 0) persen = Math.round((realisasi / target) * 100);
 
-        document.getElementById("val-jurnal-bulanan").innerText = persen + "% (" + realisasi + "/" + target + ")";
-        document.getElementById("bar-jurnal-bulanan").style.width = persen + "%";
-    } else {
-        document.getElementById("val-jurnal-bulanan").innerText = "-";
-        document.getElementById("bar-jurnal-bulanan").style.width = "0%";
+    document.getElementById("val-jurnal-bulanan").innerText = persen + "% (" + realisasi + "/" + target + ")";
+    document.getElementById("bar-jurnal-bulanan").style.width = persen + "%";
+} else {
+    document.getElementById("val-jurnal-bulanan").innerText = "-";
+    document.getElementById("bar-jurnal-bulanan").style.width = "0%";
+}
+
+// =========================================================
+// CODES BARU: SUNTIK TOMBOL "LIHAT RINCIAN" SECARA DINAMIS
+// =========================================================
+const cardJurnal = document.getElementById("val-jurnal-bulanan").closest('.card-item');
+if (cardJurnal) {
+    // Kita cek dulu, kalau tombolnya belum ada, baru kita buat (biar gak duplikat saat di-refresh)
+    if (!cardJurnal.querySelector('.btn-rincian-jurnal')) {
+        const linkRincian = document.createElement('a');
+        linkRincian.className = 'btn-rincian-jurnal';
+        linkRincian.href = '#';
+        linkRincian.innerText = 'Lihat Rincian »';
+        
+        // Atur gaya tampilan tombol agar rapi
+        linkRincian.style.cssText = 'color: #3498db; text-decoration: none; font-size: 0.9em; display: inline-block; margin-top: 10px; font-weight: bold; cursor: pointer;';
+        
+        // Hubungkan fungsi kliknya ke popup rincian jurnal
+        linkRincian.onclick = function(e) {
+            e.preventDefault();
+            bukaRincianJurnal();
+        };
+        
+        // Masukkan tombol ke dalam kotak secara paksa
+        cardJurnal.appendChild(linkRincian);
     }
+}
 
     // --- BAGIAN 3: PIKET ---
     const dataPiket = dataDariSpreadsheet.piket[namaGuru];
@@ -1448,6 +1479,7 @@ function bukaLaporan() {
 function tutupLaporan() {
     document.getElementById("modalLaporan").style.display = "none";
 }
+
         // ==========================================
         // LOGIKA TAMPILAN BIODATA
         // ==========================================
@@ -1746,6 +1778,66 @@ function bukaPopupAbsensi() {
 function tutupDetailAbsensi() {
     document.getElementById('modalDetailAbsensi').style.display = 'none';
 }
+
+        // ==========================================
+// FUNGSI RINCIAN JURNAL BULANAN
+// ==========================================
+function bukaRincianJurnal() {
+    // 1. Pastikan data sudah ditarik dari server
+    if (!dataDariSpreadsheet || !dataDariSpreadsheet.rincianJurnal) {
+        showPopup("Data Belum Siap", "Data rincian jurnal sedang dimuat atau belum tersedia.", "⏳");
+        return;
+    }
+
+    // 2. Ambil data spesifik untuk guru yang login
+    const dataRincian = dataDariSpreadsheet.rincianJurnal[namaGuru];
+    const tbody = document.getElementById("tabel-body-jurnal");
+    
+    // 3. Reset isi tabel dan tulis nama guru
+    tbody.innerHTML = ""; 
+    document.getElementById("nama-guru-jurnal").innerText = namaGuru;
+
+    // 4. Jika datanya ada, susun baris tabelnya
+    if (dataRincian && dataRincian.length > 0) {
+        dataRincian.forEach((item, index) => {
+            // Efek belang-belang pada baris tabel agar mudah dibaca
+            const bgRow = index % 2 === 0 ? "#f9f9f9" : "#ffffff";
+            
+            // Logika warna untuk kolom persen
+            let angkaPersen = parseFloat(item.persen.replace(',', '.'));
+            let warnaPersen = (angkaPersen >= 100) ? "#27ae60" : (angkaPersen > 0 ? "#e67e22" : "#e74c3c");
+
+            const tr = document.createElement("tr");
+            tr.style.backgroundColor = bgRow;
+            
+            tr.innerHTML = `
+                <td style="padding: 10px 8px; border: 1px solid #ddd; font-weight: 500;">${item.bulan}</td>
+                <td style="padding: 10px 8px; border: 1px solid #ddd;">${item.wajib}</td>
+                <td style="padding: 10px 8px; border: 1px solid #ddd;">${item.realisasi}</td>
+                <td style="padding: 10px 8px; border: 1px solid #ddd; color: ${warnaPersen}; font-weight: bold;">${item.persen}</td>
+            `;
+            tbody.appendChild(tr);
+        });
+    } else {
+        // Jika belum ada data sama sekali
+        tbody.innerHTML = "<tr><td colspan='4' style='padding: 20px; color: #7f8c8d;'>Belum ada data jurnal untuk ditampilkan.</td></tr>";
+    }
+
+    // 5. Tampilkan pop-up modalnya
+    document.getElementById("modalRincianJurnal").style.display = "block";
+}
+
+function tutupRincianJurnal() {
+    document.getElementById("modalRincianJurnal").style.display = "none";
+}
+
+// Opsional: Tutup modal saat klik area luar (gelap)
+window.addEventListener('click', function(event) {
+    const modalRincian = document.getElementById("modalRincianJurnal");
+    if (event.target === modalRincian) {
+        tutupRincianJurnal();
+    }
+});
         
     </script>
 
