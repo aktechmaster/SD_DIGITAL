@@ -935,7 +935,7 @@
   <div class="modal-box">
     <div class="modal-header">
       <h3 id="judulDetailKelas">Detail Kehadiran</h3>
-      <span class="close-btn" onclick="tutupDetailAbsensi()">&times;</span>
+      <span class="close-btn" onclick="Absensi()">&times;</span>
     </div>
     
     <div class="modal-body-table">
@@ -1769,7 +1769,7 @@ function prosesUbahPassword() {
     });
 }
 
-       // === FUNGSI POPUP ABSENSI (FINAL FIX) ===
+       // === FUNGSI POPUP ABSENSI ===
 window.bukaPopupAbsensi = function() {
     var kelas = window.kelasAktif;
     if (!kelas) {
@@ -1820,31 +1820,27 @@ window.bukaPopupAbsensi = function() {
     });
 };
 
+// === FUNGSI TUTUP ABSENSI ===
 window.tutupDetailAbsensi = function() {
-    document.getElementById('modalDetailAbsensi').style.display = 'none';
+    const modal = document.getElementById('modalDetailAbsensi');
+    if (modal) modal.style.display = 'none';
 };
 
-// ==========================================
-// FUNGSI RINCIAN JURNAL
-// ==========================================
+// === FUNGSI BUKA JURNAL ===
 window.bukaRincianJurnal = function() {
     const tbody = document.getElementById("tabel-body-jurnal");
     const elemNamaGuru = document.getElementById("nama-guru-jurnal");
     const modalRincian = document.getElementById("modalRincianJurnal");
 
     if (!tbody) {
-        console.error("Error: Elemen ID 'tabel-body-jurnal' tidak ditemukan di HTML.");
+        console.error("Error: Elemen ID 'tabel-body-jurnal' tidak ditemukan.");
         return;
     }
 
     const sumberData = dataDariSpreadsheet?.rincianJurnal || dataDariSpreadsheet?.jurnalBulanan;
 
     if (!dataDariSpreadsheet || !sumberData) {
-        if (typeof showPopup === "function") {
-            showPopup("Data Belum Siap", "Data rincian jurnal sedang dimuat atau belum tersedia.", "⏳");
-        } else {
-            alert("Data rincian jurnal sedang dimuat atau belum tersedia.");
-        }
+        alert("Data rincian jurnal sedang dimuat atau belum tersedia.");
         return;
     }
 
@@ -1860,7 +1856,6 @@ window.bukaRincianJurnal = function() {
             const keyBersih = bersihkanNama(keyNama);
             if (keyBersih.includes(namaTargetBersih) || namaTargetBersih.includes(keyBersih)) {
                 dataRincian = sumberData[keyNama];
-                console.log(`Pencocokan nama berhasil: "${namaTarget}" cocok dengan "${keyNama}"`);
                 break;
             }
         }
@@ -1892,25 +1887,28 @@ window.bukaRincianJurnal = function() {
             tbody.appendChild(tr);
         });
     } else {
-        console.warn("Nama guru tidak ditemukan. Daftar nama:", Object.keys(sumberData));
-        tbody.innerHTML = "<tr><td colspan='4' style='padding: 20px; text-align: center; color: #7f8c8d;'>Belum ada data jurnal.</td></tr>";
+        tbody.innerHTML = "<tr><td colspan='4' style='padding:20px; text-align:center; color:#7f8c8d;'>Belum ada data jurnal.</td></tr>";
     }
 
     if (modalRincian) modalRincian.style.display = "block";
 };
 
+// === FUNGSI TUTUP JURNAL ===
 window.tutupRincianJurnal = function() {
-    const modalRincian = document.getElementById("modalRincianJurnal");
-    if (modalRincian) modalRincian.style.display = "none";
+    const modal = document.getElementById('modalRincianJurnal');
+    if (modal) modal.style.display = 'none';
 };
 
+// === TUTUP JIKALAU KLIK AREA LUAR MODAL ===
 window.addEventListener('click', function(event) {
-    const modalRincian = document.getElementById("modalRincianJurnal");
-    if (modalRincian && event.target === modalRincian) {
-        tutupRincianJurnal();
-    }
+    // Tutup Absensi
+    const absen = document.getElementById('modalDetailAbsensi');
+    if (absen && event.target === absen) tutupDetailAbsensi();
+
+    // Tutup Jurnal
+    const jurnal = document.getElementById('modalRincianJurnal');
+    if (jurnal && event.target === jurnal) tutupRincianJurnal();
 });
-// HAPUS KURUNG KURAWAL TERAKHIR YANG TIDAK PERLU!
         
     </script>
 
