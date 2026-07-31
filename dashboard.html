@@ -1974,23 +1974,26 @@ function tutupLaporan() {
 // Pastikan fungsi ini terdaftar secara global di window
 window.tutupLaporan = tutupLaporan;
 
-        // --- FUNGSI PEMBUKA MODAL RINCIAN KEHADIRAN SISWA ---
-function tampilkanRincianKehadiran() {
-    const modal = document.getElementById('modalRincianKehadiran') || 
-                  document.getElementById('modalRincianKelas') ||
-                  document.getElementById('modal-rincian-kehadiran') ||
-                  document.getElementById('modalRincianJurnal');
+        // --- FUNGSI PEMBUKA POPUP REKAP KEHADIRAN SISWA ---
+function bukaPopupAbsensi() {
+    // Cari elemen modal rekap absensi berdasarkan ID yang ada
+    const modal = document.getElementById('modalAbsensi') || 
+                  document.getElementById('modalPopupAbsen') ||
+                  document.getElementById('modalRincianAbsen') ||
+                  document.getElementById('modalDetailAbsen') ||
+                  document.getElementById('modal-absen');
 
     if (modal) {
         modal.style.display = 'block'; // atau 'flex'
+    } else {
+        // Fallback jika ID memakai class modal
+        const modalClass = document.querySelector('.modal-absensi, .modal-absen, #modalRincianJurnal');
+        if (modalClass) modalClass.style.display = 'block';
     }
 }
 
-// Daftarkan semua kemungkinan nama fungsi ke 'window' global
-window.tampilkanRincianKehadiran = tampilkanRincianKehadiran;
-window.bukaRincianKehadiran = tampilkanRincianKehadiran;
-window.tampilkanRincianKelas = tampilkanRincianKehadiran;
-window.bukaRincianKelas = tampilkanRincianKehadiran;
+// Daftarkan ke window global agar bisa dipanggil tombol 'onclick'
+window.bukaPopupAbsensi = bukaPopupAbsensi;
         
     </script>
 
