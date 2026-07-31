@@ -1316,141 +1316,150 @@ if (tombolT2Q) {
 
 
         // ============================================
-        // FUNGSI BUKA LAPORAN (VERSI TERBARU - 6 POIN)
-        // ============================================
+// FUNGSI BUKA LAPORAN (PERBAIKAN WALI KELAS)
+// ============================================
 async function bukaLaporan() {
     // 1. Panggil data terbaru dari server terlebih dahulu
-    // fetchData() sudah punya loading screen bawaan Anda, jadi user tahu sistem sedang bekerja
     await fetchData(); 
 
-    // 2. Cek keamanan (berjaga-jaga jika fetch gagal)
+    // 2. Cek keamanan jika fetch gagal
     if (!dataDariSpreadsheet) {
-        showPopup("Gagal", "Gagal memuat data terbaru. Coba lagi.", "❌");
+        if (typeof showPopup === "function") {
+            showPopup("Gagal", "Gagal memuat data terbaru. Coba lagi.", "❌");
+        } else {
+            alert("Gagal memuat data terbaru. Coba lagi.");
+        }
         return;
     }
 
     // 3. Buka Modal Laporan
     const modal = document.getElementById("modalLaporan");
-    modal.style.display = "block";
+    if (modal) modal.style.display = "block";
 
     // --- BAGIAN 1: JURNAL HARIAN ---
-    const dataHarian = dataDariSpreadsheet.jurnalHarian[namaGuru];
-    if (dataHarian) {
+    const dataHarian = dataDariSpreadsheet.jurnalHarian?.[namaGuru];
+    const elValHarian = document.getElementById("val-jurnal-harian");
+    const elBarHarian = document.getElementById("bar-jurnal-harian");
+
+    if (dataHarian && elValHarian && elBarHarian) {
         let target = parseInt(dataHarian.target) || 0;
         let realisasi = parseInt(dataHarian.realisasi) || 0;
         let persen = 0;
         if (target > 0) persen = Math.round((realisasi / target) * 100);
         else if (target === 0 && realisasi === 0) persen = 100;
 
-        document.getElementById("val-jurnal-harian").innerText = persen + "% (" + realisasi + "/" + target + ")";
-        document.getElementById("bar-jurnal-harian").style.width = persen + "%";
-        document.getElementById("bar-jurnal-harian").style.background = (persen >= 100) ? "#2ecc71" : "#00c6ff";
-    } else {
-        document.getElementById("val-jurnal-harian").innerText = "Data Kosong";
-        document.getElementById("bar-jurnal-harian").style.width = "0%";
+        elValHarian.innerText = persen + "% (" + realisasi + "/" + target + ")";
+        elBarHarian.style.width = persen + "%";
+        elBarHarian.style.background = (persen >= 100) ? "#2ecc71" : "#00c6ff";
+    } else if (elValHarian && elBarHarian) {
+        elValHarian.innerText = "Data Kosong";
+        elBarHarian.style.width = "0%";
     }
 
     // --- BAGIAN 2: JURNAL BULANAN ---
-const dataBulanan = dataDariSpreadsheet.jurnalBulanan[namaGuru];
-if (dataBulanan) {
-    let target = parseInt(dataBulanan.target) || 0;
-    let realisasi = parseInt(dataBulanan.realisasi) || 0;
-    let persen = 0;
-    if (target > 0) persen = Math.round((realisasi / target) * 100);
+    const dataBulanan = dataDariSpreadsheet.jurnalBulanan?.[namaGuru];
+    const elValBulanan = document.getElementById("val-jurnal-bulanan");
+    const elBarBulanan = document.getElementById("bar-jurnal-bulanan");
 
-    document.getElementById("val-jurnal-bulanan").innerText = persen + "% (" + realisasi + "/" + target + ")";
-    document.getElementById("bar-jurnal-bulanan").style.width = persen + "%";
-} else {
-    document.getElementById("val-jurnal-bulanan").innerText = "-";
-    document.getElementById("bar-jurnal-bulanan").style.width = "0%";
-}
+    if (dataBulanan && elValBulanan && elBarBulanan) {
+        let target = parseInt(dataBulanan.target) || 0;
+        let realisasi = parseInt(dataBulanan.realisasi) || 0;
+        let persen = 0;
+        if (target > 0) persen = Math.round((realisasi / target) * 100);
 
-// =========================================================
-// CODES BARU: SUNTIK TOMBOL "LIHAT RINCIAN" SECARA DINAMIS
-// =========================================================
-const cardJurnal = document.getElementById("val-jurnal-bulanan").closest('.card-item');
-if (cardJurnal) {
-    // Kita cek dulu, kalau tombolnya belum ada, baru kita buat (biar gak duplikat saat di-refresh)
-    if (!cardJurnal.querySelector('.btn-rincian-jurnal')) {
-        const linkRincian = document.createElement('a');
-        linkRincian.className = 'btn-rincian-jurnal';
-        linkRincian.href = '#';
-        linkRincian.innerText = 'Lihat Rincian »';
-        
-        // Atur gaya tampilan tombol agar rapi
-        linkRincian.style.cssText = 'color: #3498db; text-decoration: none; font-size: 0.9em; display: inline-block; margin-top: 10px; font-weight: bold; cursor: pointer;';
-        
-        // Hubungkan fungsi kliknya ke popup rincian jurnal
-        linkRincian.onclick = function(e) {
-            e.preventDefault();
-            bukaRincianJurnal();
-        };
-        
-        // Masukkan tombol ke dalam kotak secara paksa
-        cardJurnal.appendChild(linkRincian);
+        elValBulanan.innerText = persen + "% (" + realisasi + "/" + target + ")";
+        elBarBulanan.style.width = persen + "%";
+    } else if (elValBulanan && elBarBulanan) {
+        elValBulanan.innerText = "-";
+        elBarBulanan.style.width = "0%";
     }
-}
+
+    // --- SUNTIK TOMBOL "LIHAT RINCIAN" ---
+    if (elValBulanan) {
+        const cardJurnal = elValBulanan.closest('.card-item');
+        if (cardJurnal && !cardJurnal.querySelector('.btn-rincian-jurnal')) {
+            const linkRincian = document.createElement('a');
+            linkRincian.className = 'btn-rincian-jurnal';
+            linkRincian.href = '#';
+            linkRincian.innerText = 'Lihat Rincian »';
+            linkRincian.style.cssText = 'color: #3498db; text-decoration: none; font-size: 0.9em; display: inline-block; margin-top: 10px; font-weight: bold; cursor: pointer;';
+            
+            linkRincian.onclick = function(e) {
+                e.preventDefault();
+                bukaRincianJurnal();
+            };
+            cardJurnal.appendChild(linkRincian);
+        }
+    }
 
     // --- BAGIAN 3: PIKET ---
-    const dataPiket = dataDariSpreadsheet.piket[namaGuru];
-    if (dataPiket) {
-        document.getElementById("val-piket-hadir").innerText = (dataPiket.hadir || 0) + " Kali";
-        document.getElementById("val-piket-ganti").innerText = (dataPiket.digantikan || 0) + " Kali";
-    } else {
-        document.getElementById("val-piket-hadir").innerText = "0 Kali";
-        document.getElementById("val-piket-ganti").innerText = "0 Kali";
+    const dataPiket = dataDariSpreadsheet.piket?.[namaGuru];
+    const elPiketHadir = document.getElementById("val-piket-hadir");
+    const elPiketGanti = document.getElementById("val-piket-ganti");
+
+    if (elPiketHadir && elPiketGanti) {
+        if (dataPiket) {
+            elPiketHadir.innerText = (dataPiket.hadir || 0) + " Kali";
+            elPiketGanti.innerText = (dataPiket.digantikan || 0) + " Kali";
+        } else {
+            elPiketHadir.innerText = "0 Kali";
+            elPiketGanti.innerText = "0 Kali";
+        }
     }
 
     // --- BAGIAN 4: ABSENSI ---
-    const dataAbsen = dataDariSpreadsheet.absensi[namaGuru];
-    if (dataAbsen) {
-        let jumlah = dataAbsen.jumlah || 0;
-        document.getElementById("val-absensi").innerText = jumlah + " Hari";
-        document.getElementById("val-absensi").style.color = (jumlah > 10) ? "#c0392b" : "#2c3e50";
-    } else {
-        document.getElementById("val-absensi").innerText = "0 Hari";
+    const dataAbsen = dataDariSpreadsheet.absensi?.[namaGuru];
+    const elAbsensi = document.getElementById("val-absensi");
+
+    if (elAbsensi) {
+        if (dataAbsen) {
+            let jumlah = dataAbsen.jumlah || 0;
+            elAbsensi.innerText = jumlah + " Hari";
+            elAbsensi.style.color = (jumlah > 10) ? "#c0392b" : "#2c3e50";
+        } else {
+            elAbsensi.innerText = "0 Hari";
+        }
     }
 
     // ==========================================
     // BAGIAN 5 (STATUS INPUT) & 6 (REKAP KELAS)
     // ==========================================
+    const infoGuru = dataDariSpreadsheet.biodata?.[namaGuru];
+    const divInput = document.getElementById('card-status-input'); 
+    const divRekap = document.getElementById('row-rekap-kelas');   
     
-    const infoGuru = dataDariSpreadsheet.biodata[namaGuru];
-    const divInput = document.getElementById('card-status-input'); // Kotak 5
-    const divRekap = document.getElementById('row-rekap-kelas');   // Kotak 6
-    
-    // Sembunyikan dulu (reset)
+    // Reset tampilan
     if(divInput) divInput.style.display = 'none';
     if(divRekap) divRekap.style.display = 'none';
 
-    // Pastikan data biodata guru & rekap kelas tersedia
     if (infoGuru && dataDariSpreadsheet.rekapKelas) {
+        // FIX BUG: Gabungkan jabatan, jabatanUtama, dan tugasTambahan secara aman
+        const txtJabatan = infoGuru.jabatan || infoGuru.jabatanUtama || "";
+        const txtTugas = infoGuru.tugasTambahan || "";
+        const stringPencarian = (txtJabatan + " " + txtTugas).toUpperCase().replace(/\s+/g, ' ').trim();
         
-        // Logika Pencarian Kelas (Cerdas)
-        const stringPencarian = (infoGuru.jabatan + " " + infoGuru.tugasTambahan).toUpperCase();
         const daftarKelas = Object.keys(dataDariSpreadsheet.rekapKelas);
         
         let kelasDitemukan = null;
         let dataKelas = null;
 
+        // Pencarian kelas pintar (mendukung 'WALI KELAS' maupun 'GURU KELAS')
         for (let i = 0; i < daftarKelas.length; i++) {
-            let namaKelasCek = daftarKelas[i];
-            // Cek apakah tugas guru mengandung nama kelas ini
+            let namaKelasCek = daftarKelas[i].toUpperCase().trim();
+            
             if (stringPencarian.includes(namaKelasCek)) {
-                kelasDitemukan = namaKelasCek;
-                dataKelas = dataDariSpreadsheet.rekapKelas[namaKelasCek];
+                kelasDitemukan = daftarKelas[i];
+                dataKelas = dataDariSpreadsheet.rekapKelas[kelasDitemukan];
                 break;
             }
         }
 
-        // JIKA WALI KELAS DITEMUKAN
+        // JIKA WALI KELAS / GURU KELAS DITEMUKAN
         if (kelasDitemukan && dataKelas) {
             
             // --- KOTAK 5: STATUS INPUT HARI INI ---
             if(divInput) {
                 divInput.style.display = 'block';
-                
-                // Ambil data jumlahInput (dari server kolom C)
                 let jumlahIsi = parseInt(dataKelas.jumlahInput) || 0; 
                 
                 const elStatusVal = document.getElementById('status-input-val');
@@ -1458,20 +1467,17 @@ if (cardJurnal) {
                 const elCardInput = document.getElementById('card-status-input');
 
                 if (jumlahIsi === 0) {
-                    elStatusVal.innerText = "BELUM MENGISI";
-                    elStatusVal.style.color = "#e74c3c"; // Merah
-                    elStatusMsg.innerText = "Anda belum mengisi kehadiran siswa hari ini.";
-                    elCardInput.style.borderLeftColor = "#e74c3c"; 
+                    if(elStatusVal) { elStatusVal.innerText = "BELUM MENGISI"; elStatusVal.style.color = "#e74c3c"; }
+                    if(elStatusMsg) elStatusMsg.innerText = "Anda belum mengisi kehadiran siswa hari ini.";
+                    if(elCardInput) elCardInput.style.borderLeftColor = "#e74c3c"; 
                 } else if (jumlahIsi === 1) {
-                    elStatusVal.innerText = "SUDAH MENGISI";
-                    elStatusVal.style.color = "#27ae60"; // Hijau
-                    elStatusMsg.innerText = "Terima kasih, data kehadiran hari ini aman.";
-                    elCardInput.style.borderLeftColor = "#27ae60";
+                    if(elStatusVal) { elStatusVal.innerText = "SUDAH MENGISI"; elStatusVal.style.color = "#27ae60"; }
+                    if(elStatusMsg) elStatusMsg.innerText = "Terima kasih, data kehadiran hari ini aman.";
+                    if(elCardInput) elCardInput.style.borderLeftColor = "#27ae60";
                 } else {
-                    elStatusVal.innerText = "DOUBLE INPUT (" + jumlahIsi + ")";
-                    elStatusVal.style.color = "#f39c12"; // Oranye
-                    elStatusMsg.innerText = "Anda mengisi lebih dari 1 jurnal kelas hari ini.";
-                    elCardInput.style.borderLeftColor = "#f39c12";
+                    if(elStatusVal) { elStatusVal.innerText = "DOUBLE INPUT (" + jumlahIsi + ")"; elStatusVal.style.color = "#f39c12"; }
+                    if(elStatusMsg) elStatusMsg.innerText = "Anda mengisi lebih dari 1 jurnal kelas hari ini.";
+                    if(elCardInput) elCardInput.style.borderLeftColor = "#f39c12";
                 }
             }
 
@@ -1479,21 +1485,27 @@ if (cardJurnal) {
             if(divRekap) {
                 window.kelasAktif = kelasDitemukan;
                 divRekap.style.display = 'block';
-                document.getElementById('label-rekap-kelas').textContent = "Rekap Kehadiran " + kelasDitemukan;
+                
+                const elLabel = document.getElementById('label-rekap-kelas');
+                const elVal = document.getElementById('val-rekap-kelas');
+                const elBar = document.getElementById('bar-rekap-kelas');
+                const elDetail = document.getElementById('detail-rekap-kelas');
+
+                if(elLabel) elLabel.textContent = "Rekap Kehadiran " + kelasDitemukan;
                 
                 var teksTampil = dataKelas.tampilan || "0%";
                 var lebarBar = dataKelas.persen || "0%";
 
-                document.getElementById('val-rekap-kelas').textContent = teksTampil;
-                document.getElementById('bar-rekap-kelas').style.width = lebarBar;
-
-                // Warna Bar
-                if (parseFloat(lebarBar) < 75) {
-                    document.getElementById('bar-rekap-kelas').style.backgroundColor = "#e74c3c"; // Merah
-                    document.getElementById('detail-rekap-kelas').textContent = "Perlu Perhatian";
-                } else {
-                    document.getElementById('bar-rekap-kelas').style.backgroundColor = "#27ae60"; // Hijau
-                    document.getElementById('detail-rekap-kelas').textContent = "Sangat Baik";
+                if(elVal) elVal.textContent = teksTampil;
+                if(elBar) {
+                    elBar.style.width = lebarBar;
+                    if (parseFloat(lebarBar) < 75) {
+                        elBar.style.backgroundColor = "#e74c3c";
+                        if(elDetail) elDetail.textContent = "Perlu Perhatian";
+                    } else {
+                        elBar.style.backgroundColor = "#27ae60";
+                        if(elDetail) elDetail.textContent = "Sangat Baik";
+                    }
                 }
             }
         }
