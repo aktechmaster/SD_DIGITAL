@@ -1960,30 +1960,23 @@ function tutupLaporan() {
 
 // --- 2. FUNGSI PEMBUKA POPUP RINCIAN ABSENSI SISWA ---
 function bukaPopupAbsensi() {
-    const kelas = window.kelasAktif;
-    
-    // Jika ada fungsi bawaan untuk membuka rincian jurnal/absensi kelas
-    if (typeof tampilkanRincianJurnal === 'function') {
-        tampilkanRincianJurnal(kelas);
-        return;
-    }
-    if (typeof cekAksesAbsensi === 'function') {
-        cekAksesAbsensi();
-        return;
-    }
+    // 1. Langsung cari popup modal absensi
+    const modalAbsen = document.getElementById("modalAbsensi") || 
+                       document.getElementById("modalRincianAbsen") ||
+                       document.getElementById("modalDetailAbsen") ||
+                       document.getElementById("modal-absen");
 
-    // Jika menggunakan modal popup rincian
-    const modalRincian = document.getElementById("modalRincianJurnal") || 
-                         document.getElementById("modalAbsensi");
-    if (modalRincian) {
-        modalRincian.style.display = "block";
+    if (modalAbsen) {
+        modalAbsen.style.display = "block";
+    } 
+    // 2. Jika modal tidak ada, arahkan langsung ke Menu Absensi (cekAksesAbsensi)
+    else if (typeof cekAksesAbsensi === 'function') {
+        cekAksesAbsensi();
     } else {
-        alert("Menampilkan rincian absensi untuk kelas " + (kelas || "ini"));
+        alert("Halaman rincian kehadiran sedang disiapkan.");
     }
 }
 
-// Mendaftarkan fungsi ke window global agar aman dipanggil atribut 'onclick'
-window.tutupLaporan = tutupLaporan;
 window.bukaPopupAbsensi = bukaPopupAbsensi;
         
     </script>
