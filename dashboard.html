@@ -1770,8 +1770,7 @@ function prosesUbahPassword() {
 }
 
         // === FUNGSI POPUP ABSENSI (FINAL FIX) ===
-function bukaPopupAbsensi() {
-    // 1. Ambil Nama Kelas
+window.bukaPopupAbsensi = function() {
     var kelas = window.kelasAktif;
     if (!kelas) {
         try {
@@ -1779,21 +1778,15 @@ function bukaPopupAbsensi() {
             kelas = label.replace("Rekap Kehadiran ", "").trim();
         } catch (e) {}
     }
-
     if (!kelas) { alert("Kelas tidak ditemukan. Refresh halaman."); return; }
 
-    // 2. Tampilkan Popup (Dengan CSS Z-Index Baru)
     var modal = document.getElementById('modalDetailAbsensi');
-    modal.style.display = 'flex'; // Pakai flex agar di tengah
+    modal.style.display = 'flex';
     document.getElementById('judulDetailKelas').innerText = "Detail: " + kelas;
     var tbody = document.getElementById('isiTabelAbsensi');
     tbody.innerHTML = '<tr><td colspan="6" style="padding:20px; text-align:center;">Sedang mengambil data... <br>⏳ Mohon tunggu...</td></tr>';
 
-    // 3.  SCRIPT (PASTIKAN SUDAH DEPLOY NEW VERSION & AKSES ANYONE)
-    // TEMPEL  ANDA DI BAWAH INI ANTARA DUA TANDA KUTIP:
-    var urlTujuan = "https://script.google.com/macros/s/AKfycbwqC7MvEayos9s8IdYbcoXF488iQ09-LneUD0DvawKUf6AYIUWPOaI0NvMfNEMQP6JVBA/exec"; 
-
-    // 4. Fetch Data
+    var urlTujuan = "https://script.google.com/macros/s/AKfycbwqC7MvEayos9s8IdYbcoXF488iQ09-LneUD0DvawKUf6AYIUWPOaI0NvMfNEMQP6JVBA/exec";
     var fullUrl = urlTujuan + "?action=getRekapDetail&kelas=" + encodeURIComponent(kelas);
     
     fetch(fullUrl)
@@ -1806,13 +1799,10 @@ function bukaPopupAbsensi() {
             data.forEach(siswa => {
                 var strPersen = String(siswa.persen).replace('%','').replace(',','.');
                 var nilai = parseFloat(strPersen);
-                if (nilai <= 1 && nilai > 0) { nilai = nilai * 100; } // Handle desimal 0.5 -> 50%
+                if (nilai <= 1 && nilai > 0) nilai = nilai * 100;
                 if (isNaN(nilai)) nilai = 0;
-
                 var warna = (nilai < 80) ? 'badge-merah' : 'badge-hijau';
-                
-                html += `
-                <tr>
+                html += `<tr>
                     <td style="text-align:left; font-weight:500;">${siswa.nama}</td>
                     <td>${siswa.h}</td>
                     <td>${siswa.s}</td>
@@ -1826,17 +1816,13 @@ function bukaPopupAbsensi() {
     })
     .catch(error => {
         console.error(error);
-        tbody.innerHTML = '<tr><td colspan="6" style="color:red; padding:20px; text-align:center;">' +
-            'Gagal mengambil data.<br><br>' + 
-            '<small>Tips: Pastikan Script sudah di-Deploy sebagai <b>"New Version"</b><br>' +
-            'dan Akses diatur ke <b>"Anyone (Siapa Saja)"</b>.</small></td></tr>';
+        tbody.innerHTML = '<tr><td colspan="6" style="color:red; padding:20px; text-align:center;">Gagal mengambil data.<br><br><small>Pastikan Script sudah di-Deploy "New Version" & Akses "Anyone".</small></td></tr>';
     });
-}
+};
 
-// Fungsi Tutup (Pastikan ini ada)
-function tutupDetailAbsensi() {
+window.tutupDetailAbsensi = function() {
     document.getElementById('modalDetailAbsensi').style.display = 'none';
-}
+};
 
 // ==========================================
 // FUNGSI RINCIAN JURNAL BULANAN (PENCARIAN PINTAR)
