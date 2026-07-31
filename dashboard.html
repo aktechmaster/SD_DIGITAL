@@ -1769,7 +1769,19 @@ function prosesUbahPassword() {
     });
 }
 
-       // === FUNGSI ABSENSI ===
+       // === FUNGSI BUKA LAPORAN KINERJA ===
+window.bukaLaporan = function() {
+    // Tulis kode buka laporan kamu di sini, contoh:
+    document.getElementById('modalLaporanKinerja').style.display = 'flex';
+};
+
+// === FUNGSI TUTUP LAPORAN ===
+window.tutupLaporan = function() {
+    const modal = document.getElementById('modalLaporanKinerja');
+    if (modal) modal.style.display = 'none';
+};
+
+// === FUNGSI POPUP ABSENSI ===
 window.bukaPopupAbsensi = function() {
     var kelas = window.kelasAktif;
     if (!kelas) {
@@ -1897,13 +1909,11 @@ window.tutupRincianJurnal = function() {
     if (modal) modal.style.display = 'none';
 };
 
-// === FUNGSI BUKA LAPORAN ===
-window.bukaLaporan = function() {
-    // Isi fungsi buka laporan kamu di sini
-};
-
-// === TUTUP KLIK LUAR ===
+// === TUTUP KETIK KLIK LUAR SEMUA MODAL ===
 window.addEventListener('click', function(event) {
+    const laporan = document.getElementById('modalLaporanKinerja');
+    if (laporan && event.target === laporan) tutupLaporan();
+
     const absen = document.getElementById('modalDetailAbsensi');
     if (absen && event.target === absen) tutupDetailAbsensi();
 
