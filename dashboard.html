@@ -1807,20 +1807,19 @@ function tutupDetailAbsensi() {
 // FUNGSI RINCIAN JURNAL BULANAN
 // ==========================================
 function bukaRincianJurnal() {
-    // 1. Ambil elemen DOM terlebih dahulu
+    // 1. Ambil elemen DOM
     const tbody = document.getElementById("tabel-body-jurnal");
     const elemNamaGuru = document.getElementById("nama-guru-jurnal");
     const modalRincian = document.getElementById("modalRincianJurnal");
 
-    // Cek apakah elemen tabel utama ada. Jika tidak, hentikan fungsi agar tidak crash.
     if (!tbody) {
         console.error("Error: Elemen ID 'tabel-body-jurnal' tidak ditemukan di HTML.");
-        alert("Elemen 'tabel-body-jurnal' tidak ditemukan pada kode HTML.");
         return;
     }
 
     // 2. Pastikan data dari server sudah tersedia
-    if (typeof dataDariSpreadsheet === "undefined" || !dataDariSpreadsheet || !dataDariSpreadsheet.rincianJurnal) {
+    // FIX: Menggunakan 'jurnalBulanan', bukan 'rincianJurnal'
+    if (typeof dataDariSpreadsheet === "undefined" || !dataDariSpreadsheet || !dataDariSpreadsheet.jurnalBulanan) {
         if (typeof showPopup === "function") {
             showPopup("Data Belum Siap", "Data rincian jurnal sedang dimuat atau belum tersedia.", "⏳");
         } else {
@@ -1831,7 +1830,14 @@ function bukaRincianJurnal() {
 
     // 3. Ambil data spesifik untuk guru yang login
     const nama = typeof namaGuru !== "undefined" ? namaGuru : "";
-    const dataRincian = dataDariSpreadsheet.rincianJurnal[nama] || [];
+    
+    // FIX: Otomatis mendeteksi apakah jurnalBulanan berupa Objek per Guru atau langsung Array
+    let dataRincian = [];
+    if (Array.isArray(dataDariSpreadsheet.jurnalBulanan)) {
+        dataRincian = dataDariSpreadsheet.jurnalBulanan;
+    } else if (dataDariSpreadsheet.jurnalBulanan[nama]) {
+        dataRincian = dataDariSpreadsheet.jurnalBulanan[nama];
+    }
 
     // Reset isi tabel & update nama guru jika elemennya tersedia
     tbody.innerHTML = ""; 
@@ -1844,7 +1850,7 @@ function bukaRincianJurnal() {
         dataRincian.forEach((item, index) => {
             const bgRow = index % 2 === 0 ? "#f9f9f9" : "#ffffff";
             
-            // Konversi nilai persen ke string terlebih dahulu untuk menghindari error .replace()
+            // Pengamanan tipe data persen
             let strPersen = String(item.persen || "0");
             let angkaPersen = parseFloat(strPersen.replace(',', '.')) || 0;
             let warnaPersen = (angkaPersen >= 100) ? "#27ae60" : (angkaPersen > 0 ? "#e67e22" : "#e74c3c");
@@ -1852,24 +1858,28 @@ function bukaRincianJurnal() {
             const tr = document.createElement("tr");
             tr.style.backgroundColor = bgRow;
             
+            // Fallback nama properti jika di GAS menggunakan istilah berbeda (misal: target/realisasi)
+            const bulan = item.bulan || item.namaBulan || '-';
+            const wajib = item.wajib ?? item.target ?? 0;
+            const realisasi = item.realisasi ?? item.terisi ?? 0;
+            const persen = item.persen || '0%';
+
             tr.innerHTML = `
-                <td style="padding: 10px 8px; border: 1px solid #ddd; font-weight: 500;">${item.bulan || '-'}</td>
-                <td style="padding: 10px 8px; border: 1px solid #ddd;">${item.wajib ?? 0}</td>
-                <td style="padding: 10px 8px; border: 1px solid #ddd;">${item.realisasi ?? 0}</td>
-                <td style="padding: 10px 8px; border: 1px solid #ddd; color: ${warnaPersen}; font-weight: bold;">${item.persen || '0%'}</td>
+                <td style="padding: 10px 8px; border: 1px solid #ddd; font-weight: 500;">${bulan}</td>
+                <td style="padding: 10px 8px; border: 1px solid #ddd;">${wajib}</td>
+                <td style="padding: 10px 8px; border: 1px solid #ddd;">${realisasi}</td>
+                <td style="padding: 10px 8px; border: 1px solid #ddd; color: ${warnaPersen}; font-weight: bold;">${persen}</td>
             `;
             tbody.appendChild(tr);
         });
     } else {
-        // Jika belum ada data sama sekali
+        // Jika data kosong
         tbody.innerHTML = "<tr><td colspan='4' style='padding: 20px; text-align: center; color: #7f8c8d;'>Belum ada data jurnal untuk ditampilkan.</td></tr>";
     }
 
     // 5. Tampilkan pop-up modalnya
     if (modalRincian) {
         modalRincian.style.display = "block";
-    } else {
-        console.error("Error: Elemen ID 'modalRincianJurnal' tidak ditemukan di HTML.");
     }
 }
 
