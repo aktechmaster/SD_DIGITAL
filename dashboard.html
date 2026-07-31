@@ -1952,32 +1952,6 @@ window.addEventListener('click', function(event) {
     }
 });
 }
-    // --- 1. FUNGSI PENUTUP LAPORAN ---
-function tutupLaporan() {
-    const modal = document.getElementById("modalLaporan");
-    if (modal) modal.style.display = "none";
-}
-
-// --- 2. FUNGSI PEMBUKA POPUP RINCIAN ABSENSI SISWA ---
-function bukaPopupAbsensi() {
-    // 1. Langsung cari popup modal absensi
-    const modalAbsen = document.getElementById("modalAbsensi") || 
-                       document.getElementById("modalRincianAbsen") ||
-                       document.getElementById("modalDetailAbsen") ||
-                       document.getElementById("modal-absen");
-
-    if (modalAbsen) {
-        modalAbsen.style.display = "block";
-    } 
-    // 2. Jika modal tidak ada, arahkan langsung ke Menu Absensi (cekAksesAbsensi)
-    else if (typeof cekAksesAbsensi === 'function') {
-        cekAksesAbsensi();
-    } else {
-        alert("Halaman rincian kehadiran sedang disiapkan.");
-    }
-}
-
-window.bukaPopupAbsensi = bukaPopupAbsensi;
         
     </script>
 
