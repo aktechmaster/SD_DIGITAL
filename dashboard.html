@@ -1783,58 +1783,83 @@ function tutupDetailAbsensi() {
 // FUNGSI RINCIAN JURNAL BULANAN
 // ==========================================
 function bukaRincianJurnal() {
-    // 1. Pastikan data sudah ditarik dari server
-    if (!dataDariSpreadsheet || !dataDariSpreadsheet.rincianJurnal) {
-        showPopup("Data Belum Siap", "Data rincian jurnal sedang dimuat atau belum tersedia.", "⏳");
+    // 1. Ambil elemen DOM terlebih dahulu
+    const tbody = document.getElementById("tabel-body-jurnal");
+    const elemNamaGuru = document.getElementById("nama-guru-jurnal");
+    const modalRincian = document.getElementById("modalRincianJurnal");
+
+    // Cek apakah elemen tabel utama ada. Jika tidak, hentikan fungsi agar tidak crash.
+    if (!tbody) {
+        console.error("Error: Elemen ID 'tabel-body-jurnal' tidak ditemukan di HTML.");
+        alert("Elemen 'tabel-body-jurnal' tidak ditemukan pada kode HTML.");
         return;
     }
 
-    // 2. Ambil data spesifik untuk guru yang login
-    const dataRincian = dataDariSpreadsheet.rincianJurnal[namaGuru];
-    const tbody = document.getElementById("tabel-body-jurnal");
-    
-    // 3. Reset isi tabel dan tulis nama guru
+    // 2. Pastikan data dari server sudah tersedia
+    if (typeof dataDariSpreadsheet === "undefined" || !dataDariSpreadsheet || !dataDariSpreadsheet.rincianJurnal) {
+        if (typeof showPopup === "function") {
+            showPopup("Data Belum Siap", "Data rincian jurnal sedang dimuat atau belum tersedia.", "⏳");
+        } else {
+            alert("Data rincian jurnal sedang dimuat atau belum tersedia.");
+        }
+        return;
+    }
+
+    // 3. Ambil data spesifik untuk guru yang login
+    const nama = typeof namaGuru !== "undefined" ? namaGuru : "";
+    const dataRincian = dataDariSpreadsheet.rincianJurnal[nama] || [];
+
+    // Reset isi tabel & update nama guru jika elemennya tersedia
     tbody.innerHTML = ""; 
-    document.getElementById("nama-guru-jurnal").innerText = namaGuru;
+    if (elemNamaGuru) {
+        elemNamaGuru.innerText = nama;
+    }
 
     // 4. Jika datanya ada, susun baris tabelnya
-    if (dataRincian && dataRincian.length > 0) {
+    if (Array.isArray(dataRincian) && dataRincian.length > 0) {
         dataRincian.forEach((item, index) => {
-            // Efek belang-belang pada baris tabel agar mudah dibaca
             const bgRow = index % 2 === 0 ? "#f9f9f9" : "#ffffff";
             
-            // Logika warna untuk kolom persen
-            let angkaPersen = parseFloat(item.persen.replace(',', '.'));
+            // Konversi nilai persen ke string terlebih dahulu untuk menghindari error .replace()
+            let strPersen = String(item.persen || "0");
+            let angkaPersen = parseFloat(strPersen.replace(',', '.')) || 0;
             let warnaPersen = (angkaPersen >= 100) ? "#27ae60" : (angkaPersen > 0 ? "#e67e22" : "#e74c3c");
 
             const tr = document.createElement("tr");
             tr.style.backgroundColor = bgRow;
             
             tr.innerHTML = `
-                <td style="padding: 10px 8px; border: 1px solid #ddd; font-weight: 500;">${item.bulan}</td>
-                <td style="padding: 10px 8px; border: 1px solid #ddd;">${item.wajib}</td>
-                <td style="padding: 10px 8px; border: 1px solid #ddd;">${item.realisasi}</td>
-                <td style="padding: 10px 8px; border: 1px solid #ddd; color: ${warnaPersen}; font-weight: bold;">${item.persen}</td>
+                <td style="padding: 10px 8px; border: 1px solid #ddd; font-weight: 500;">${item.bulan || '-'}</td>
+                <td style="padding: 10px 8px; border: 1px solid #ddd;">${item.wajib ?? 0}</td>
+                <td style="padding: 10px 8px; border: 1px solid #ddd;">${item.realisasi ?? 0}</td>
+                <td style="padding: 10px 8px; border: 1px solid #ddd; color: ${warnaPersen}; font-weight: bold;">${item.persen || '0%'}</td>
             `;
             tbody.appendChild(tr);
         });
     } else {
         // Jika belum ada data sama sekali
-        tbody.innerHTML = "<tr><td colspan='4' style='padding: 20px; color: #7f8c8d;'>Belum ada data jurnal untuk ditampilkan.</td></tr>";
+        tbody.innerHTML = "<tr><td colspan='4' style='padding: 20px; text-align: center; color: #7f8c8d;'>Belum ada data jurnal untuk ditampilkan.</td></tr>";
     }
 
     // 5. Tampilkan pop-up modalnya
-    document.getElementById("modalRincianJurnal").style.display = "block";
+    if (modalRincian) {
+        modalRincian.style.display = "block";
+    } else {
+        console.error("Error: Elemen ID 'modalRincianJurnal' tidak ditemukan di HTML.");
+    }
 }
 
 function tutupRincianJurnal() {
-    document.getElementById("modalRincianJurnal").style.display = "none";
+    const modalRincian = document.getElementById("modalRincianJurnal");
+    if (modalRincian) {
+        modalRincian.style.display = "none";
+    }
 }
 
-// Opsional: Tutup modal saat klik area luar (gelap)
+// Tutup modal saat klik area luar (gelap)
 window.addEventListener('click', function(event) {
     const modalRincian = document.getElementById("modalRincianJurnal");
-    if (event.target === modalRincian) {
+    if (modalRincian && event.target === modalRincian) {
         tutupRincianJurnal();
     }
 });
