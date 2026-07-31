@@ -1973,6 +1973,24 @@ function tutupLaporan() {
 
 // Pastikan fungsi ini terdaftar secara global di window
 window.tutupLaporan = tutupLaporan;
+
+        // --- FUNGSI PEMBUKA MODAL RINCIAN KEHADIRAN SISWA ---
+function tampilkanRincianKehadiran() {
+    const modal = document.getElementById('modalRincianKehadiran') || 
+                  document.getElementById('modalRincianKelas') ||
+                  document.getElementById('modal-rincian-kehadiran') ||
+                  document.getElementById('modalRincianJurnal');
+
+    if (modal) {
+        modal.style.display = 'block'; // atau 'flex'
+    }
+}
+
+// Daftarkan semua kemungkinan nama fungsi ke 'window' global
+window.tampilkanRincianKehadiran = tampilkanRincianKehadiran;
+window.bukaRincianKehadiran = tampilkanRincianKehadiran;
+window.tampilkanRincianKelas = tampilkanRincianKehadiran;
+window.bukaRincianKelas = tampilkanRincianKehadiran;
         
     </script>
 
