@@ -1803,11 +1803,10 @@ function tutupDetailAbsensi() {
     document.getElementById('modalDetailAbsensi').style.display = 'none';
 }
 
-        // ==========================================
-// FUNGSI RINCIAN JURNAL BULANAN
+// ==========================================
+// FUNGSI RINCIAN JURNAL BULANAN (PENCARIAN PINTAR)
 // ==========================================
 function bukaRincianJurnal() {
-    // 1. Ambil elemen DOM
     const tbody = document.getElementById("tabel-body-jurnal");
     const elemNamaGuru = document.getElementById("nama-guru-jurnal");
     const modalRincian = document.getElementById("modalRincianJurnal");
@@ -1817,9 +1816,10 @@ function bukaRincianJurnal() {
         return;
     }
 
-    // 2. Pastikan data dari server sudah tersedia
-    // FIX: Menggunakan 'jurnalBulanan', bukan 'rincianJurnal'
-    if (typeof dataDariSpreadsheet === "undefined" || !dataDariSpreadsheet || !dataDariSpreadsheet.jurnalBulanan) {
+    // 1. Cek ketersediaan data rincianJurnal
+    const sumberData = dataDariSpreadsheet?.rincianJurnal || dataDariSpreadsheet?.jurnalBulanan;
+
+    if (!dataDariSpreadsheet || !sumberData) {
         if (typeof showPopup === "function") {
             showPopup("Data Belum Siap", "Data rincian jurnal sedang dimuat atau belum tersedia.", "⏳");
         } else {
@@ -1828,29 +1828,42 @@ function bukaRincianJurnal() {
         return;
     }
 
-    // 3. Ambil data spesifik untuk guru yang login
-    const nama = typeof namaGuru !== "undefined" ? namaGuru : "";
-    
-    // FIX: Otomatis mendeteksi apakah jurnalBulanan berupa Objek per Guru atau langsung Array
-    let dataRincian = [];
-    if (Array.isArray(dataDariSpreadsheet.jurnalBulanan)) {
-        dataRincian = dataDariSpreadsheet.jurnalBulanan;
-    } else if (dataDariSpreadsheet.jurnalBulanan[nama]) {
-        dataRincian = dataDariSpreadsheet.jurnalBulanan[nama];
+    // 2. Ambil nama guru login
+    const namaTarget = typeof namaGuru !== "undefined" ? namaGuru : "";
+
+    // Fungsi pembersih string (hapus gelar, tanda baca, spasi, & buat huruf kecil)
+    const bersihkanNama = (str) => String(str).toLowerCase().replace(/[^a-z0-9]/g, '');
+    const namaTargetBersih = bersihkanNama(namaTarget);
+
+    // 3. Cari data guru secara fleksibel
+    let dataRincian = null;
+
+    // Cek dulu apakah persis cocok
+    if (sumberData[namaTarget]) {
+        dataRincian = sumberData[namaTarget];
+    } else {
+        // Jika beda penulisan gelar/spasi, cari yang paling mendekati
+        for (let keyNama in sumberData) {
+            const keyBersih = bersihkanNama(keyNama);
+            if (keyBersih.includes(namaTargetBersih) || namaTargetBersih.includes(keyBersih)) {
+                dataRincian = sumberData[keyNama];
+                console.log(`Pencocokan nama berhasil: "${namaTarget}" cocok dengan "${keyNama}"`);
+                break;
+            }
+        }
     }
 
-    // Reset isi tabel & update nama guru jika elemennya tersedia
+    // Reset isi tabel & update nama guru
     tbody.innerHTML = ""; 
     if (elemNamaGuru) {
-        elemNamaGuru.innerText = nama;
+        elemNamaGuru.innerText = namaTarget;
     }
 
-    // 4. Jika datanya ada, susun baris tabelnya
+    // 4. Tampilkan data ke tabel jika ditemukan
     if (Array.isArray(dataRincian) && dataRincian.length > 0) {
         dataRincian.forEach((item, index) => {
             const bgRow = index % 2 === 0 ? "#f9f9f9" : "#ffffff";
             
-            // Pengamanan tipe data persen
             let strPersen = String(item.persen || "0");
             let angkaPersen = parseFloat(strPersen.replace(',', '.')) || 0;
             let warnaPersen = (angkaPersen >= 100) ? "#27ae60" : (angkaPersen > 0 ? "#e67e22" : "#e74c3c");
@@ -1858,7 +1871,6 @@ function bukaRincianJurnal() {
             const tr = document.createElement("tr");
             tr.style.backgroundColor = bgRow;
             
-            // Fallback nama properti jika di GAS menggunakan istilah berbeda (misal: target/realisasi)
             const bulan = item.bulan || item.namaBulan || '-';
             const wajib = item.wajib ?? item.target ?? 0;
             const realisasi = item.realisasi ?? item.terisi ?? 0;
@@ -1873,30 +1885,16 @@ function bukaRincianJurnal() {
             tbody.appendChild(tr);
         });
     } else {
-        // Jika data kosong
+        // Log penjelas di console browser jika nama tetap tidak ditemukan
+        console.warn("Nama guru tidak ditemukan di rincianJurnal. Daftar nama yang ada:", Object.keys(sumberData));
         tbody.innerHTML = "<tr><td colspan='4' style='padding: 20px; text-align: center; color: #7f8c8d;'>Belum ada data jurnal untuk ditampilkan.</td></tr>";
     }
 
-    // 5. Tampilkan pop-up modalnya
+    // 5. Tampilkan Modal
     if (modalRincian) {
         modalRincian.style.display = "block";
     }
 }
-
-function tutupRincianJurnal() {
-    const modalRincian = document.getElementById("modalRincianJurnal");
-    if (modalRincian) {
-        modalRincian.style.display = "none";
-    }
-}
-
-// Tutup modal saat klik area luar (gelap)
-window.addEventListener('click', function(event) {
-    const modalRincian = document.getElementById("modalRincianJurnal");
-    if (modalRincian && event.target === modalRincian) {
-        tutupRincianJurnal();
-    }
-});
         
     </script>
 
