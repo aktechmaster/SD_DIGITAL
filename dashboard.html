@@ -1424,40 +1424,54 @@ async function bukaLaporan() {
     // ==========================================
     // BAGIAN 5 (STATUS INPUT) & 6 (REKAP KELAS)
     // ==========================================
-    const infoGuru = dataDariSpreadsheet.biodata?.[namaGuru];
     const divInput = document.getElementById('card-status-input'); 
     const divRekap = document.getElementById('row-rekap-kelas');   
     
-    // Reset tampilan
     if(divInput) divInput.style.display = 'none';
     if(divRekap) divRekap.style.display = 'none';
 
+    // 1. Ambil biodata guru (dengan pencarian fleksibel jika nama persis tidak ketemu)
+    let infoGuru = dataDariSpreadsheet.biodata?.[namaGuru];
+    if (!infoGuru && dataDariSpreadsheet.biodata) {
+        const bersihkanString = s => String(s).toLowerCase().replace(/[^a-z0-9]/g, '');
+        const targetNama = bersihkanString(namaGuru);
+        for (let key in dataDariSpreadsheet.biodata) {
+            if (bersihkanString(key) === targetNama) {
+                infoGuru = dataDariSpreadsheet.biodata[key];
+                break;
+            }
+        }
+    }
+
+    // 2. Jika biodata dan rekapKelas ada
     if (infoGuru && dataDariSpreadsheet.rekapKelas) {
-        // FIX BUG: Gabungkan jabatan, jabatanUtama, dan tugasTambahan secara aman
         const txtJabatan = infoGuru.jabatan || infoGuru.jabatanUtama || "";
         const txtTugas = infoGuru.tugasTambahan || "";
-        const stringPencarian = (txtJabatan + " " + txtTugas).toUpperCase().replace(/\s+/g, ' ').trim();
+        const teksGabungan = (txtJabatan + " " + txtTugas).toUpperCase();
         
+        // Helper untuk membersihkan tanda baca/strip agar misal "5 AL-BAHRI 2" cocok dengan "5 AL BAHRI 2"
+        const bersihkanKelas = s => String(s).toUpperCase().replace(/[^A-Z0-9]/g, '');
+        const teksPencarianClean = bersihkanKelas(teksGabungan);
+
         const daftarKelas = Object.keys(dataDariSpreadsheet.rekapKelas);
-        
         let kelasDitemukan = null;
         let dataKelas = null;
 
-        // Pencarian kelas pintar (mendukung 'WALI KELAS' maupun 'GURU KELAS')
         for (let i = 0; i < daftarKelas.length; i++) {
-            let namaKelasCek = daftarKelas[i].toUpperCase().trim();
+            let namaKelasAsli = daftarKelas[i];
+            let namaKelasClean = bersihkanKelas(namaKelasAsli);
             
-            if (stringPencarian.includes(namaKelasCek)) {
-                kelasDitemukan = daftarKelas[i];
-                dataKelas = dataDariSpreadsheet.rekapKelas[kelasDitemukan];
+            if (teksPencarianClean.includes(namaKelasClean)) {
+                kelasDitemukan = namaKelasAsli;
+                dataKelas = dataDariSpreadsheet.rekapKelas[namaKelasAsli];
                 break;
             }
         }
 
-        // JIKA WALI KELAS / GURU KELAS DITEMUKAN
+        // 3. Jika kelas ditemukan, tampilkan Kotak 5 & 6
         if (kelasDitemukan && dataKelas) {
             
-            // --- KOTAK 5: STATUS INPUT HARI INI ---
+            // --- KOTAK 5: STATUS INPUT ---
             if(divInput) {
                 divInput.style.display = 'block';
                 let jumlahIsi = parseInt(dataKelas.jumlahInput) || 0; 
@@ -1508,7 +1522,11 @@ async function bukaLaporan() {
                     }
                 }
             }
+        } else {
+            console.warn("Wali Kelas tidak cocok. Jabatan Guru:", teksGabungan, "| Daftar kelas yang ada:", daftarKelas);
         }
+    } else {
+        console.warn("Biodata guru tidak ditemukan untuk nama:", namaGuru);
     }
 }
 
