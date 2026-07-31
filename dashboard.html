@@ -1952,6 +1952,27 @@ window.addEventListener('click', function(event) {
     }
 });
 }
+    // --- FUNGSI UNTUK MENUTUP MODAL LAPORAN ---
+function tutupLaporan() {
+    // 1. Cari elemen modal laporan berdasarkan ID
+    const modal = document.getElementById('modal-laporan') || 
+                  document.getElementById('modalLaporan') ||
+                  document.getElementById('modalKinerja');
+
+    if (modal) {
+        modal.style.display = 'none';
+    } else {
+        // 2. Fallback otomatis jika nama ID modal kamu berbeda
+        const tombolClose = document.querySelector('[onclick*="tutupLaporan"]');
+        if (tombolClose) {
+            const overlayModal = tombolClose.closest('.modal, .modal-overlay, [id*="modal"], [class*="modal"]');
+            if (overlayModal) overlayModal.style.display = 'none';
+        }
+    }
+}
+
+// Pastikan fungsi ini terdaftar secara global di window
+window.tutupLaporan = tutupLaporan;
         
     </script>
 
