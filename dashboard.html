@@ -1769,7 +1769,7 @@ function prosesUbahPassword() {
     });
 }
 
-        // === FUNGSI POPUP ABSENSI (FINAL FIX) ===
+       // === FUNGSI POPUP ABSENSI (FINAL FIX) ===
 window.bukaPopupAbsensi = function() {
     var kelas = window.kelasAktif;
     if (!kelas) {
@@ -1825,9 +1825,9 @@ window.tutupDetailAbsensi = function() {
 };
 
 // ==========================================
-// FUNGSI RINCIAN JURNAL BULANAN (PENCARIAN PINTAR)
+// FUNGSI RINCIAN JURNAL
 // ==========================================
-function bukaRincianJurnal() {
+window.bukaRincianJurnal = function() {
     const tbody = document.getElementById("tabel-body-jurnal");
     const elemNamaGuru = document.getElementById("nama-guru-jurnal");
     const modalRincian = document.getElementById("modalRincianJurnal");
@@ -1837,7 +1837,6 @@ function bukaRincianJurnal() {
         return;
     }
 
-    // 1. Cek ketersediaan data rincianJurnal
     const sumberData = dataDariSpreadsheet?.rincianJurnal || dataDariSpreadsheet?.jurnalBulanan;
 
     if (!dataDariSpreadsheet || !sumberData) {
@@ -1849,21 +1848,14 @@ function bukaRincianJurnal() {
         return;
     }
 
-    // 2. Ambil nama guru login
     const namaTarget = typeof namaGuru !== "undefined" ? namaGuru : "";
-
-    // Fungsi pembersih string (hapus gelar, tanda baca, spasi, & buat huruf kecil)
     const bersihkanNama = (str) => String(str).toLowerCase().replace(/[^a-z0-9]/g, '');
     const namaTargetBersih = bersihkanNama(namaTarget);
 
-    // 3. Cari data guru secara fleksibel
     let dataRincian = null;
-
-    // Cek dulu apakah persis cocok
     if (sumberData[namaTarget]) {
         dataRincian = sumberData[namaTarget];
     } else {
-        // Jika beda penulisan gelar/spasi, cari yang paling mendekati
         for (let keyNama in sumberData) {
             const keyBersih = bersihkanNama(keyNama);
             if (keyBersih.includes(namaTargetBersih) || namaTargetBersih.includes(keyBersih)) {
@@ -1874,24 +1866,18 @@ function bukaRincianJurnal() {
         }
     }
 
-    // Reset isi tabel & update nama guru
     tbody.innerHTML = ""; 
-    if (elemNamaGuru) {
-        elemNamaGuru.innerText = namaTarget;
-    }
+    if (elemNamaGuru) elemNamaGuru.innerText = namaTarget;
 
-    // 4. Tampilkan data ke tabel jika ditemukan
     if (Array.isArray(dataRincian) && dataRincian.length > 0) {
         dataRincian.forEach((item, index) => {
             const bgRow = index % 2 === 0 ? "#f9f9f9" : "#ffffff";
-            
             let strPersen = String(item.persen || "0");
             let angkaPersen = parseFloat(strPersen.replace(',', '.')) || 0;
             let warnaPersen = (angkaPersen >= 100) ? "#27ae60" : (angkaPersen > 0 ? "#e67e22" : "#e74c3c");
 
             const tr = document.createElement("tr");
             tr.style.backgroundColor = bgRow;
-            
             const bulan = item.bulan || item.namaBulan || '-';
             const wajib = item.wajib ?? item.target ?? 0;
             const realisasi = item.realisasi ?? item.terisi ?? 0;
@@ -1906,38 +1892,25 @@ function bukaRincianJurnal() {
             tbody.appendChild(tr);
         });
     } else {
-        // Log penjelas di console browser jika nama tetap tidak ditemukan
-        console.warn("Nama guru tidak ditemukan di rincianJurnal. Daftar nama yang ada:", Object.keys(sumberData));
-        tbody.innerHTML = "<tr><td colspan='4' style='padding: 20px; text-align: center; color: #7f8c8d;'>Belum ada data jurnal untuk ditampilkan.</td></tr>";
+        console.warn("Nama guru tidak ditemukan. Daftar nama:", Object.keys(sumberData));
+        tbody.innerHTML = "<tr><td colspan='4' style='padding: 20px; text-align: center; color: #7f8c8d;'>Belum ada data jurnal.</td></tr>";
     }
 
-    // 5. Tampilkan Modal
-    if (modalRincian) {
-        modalRincian.style.display = "block";
-    }
-}
+    if (modalRincian) modalRincian.style.display = "block";
+};
 
-        // ==========================================
-// FUNGSI PENUTUP MODAL (PASTIKAN GLOBAL)
-// ==========================================
-function tutupRincianJurnal() {
+window.tutupRincianJurnal = function() {
     const modalRincian = document.getElementById("modalRincianJurnal");
-    if (modalRincian) {
-        modalRincian.style.display = "none";
-    }
-}
+    if (modalRincian) modalRincian.style.display = "none";
+};
 
-// Mendaftarkan fungsi ke 'window' agar pasti terbaca oleh tag onclick HTML
-window.tutupRincianJurnal = tutupRincianJurnal;
-
-// Menutup modal otomatis jika area hitam luar popup diklik
 window.addEventListener('click', function(event) {
     const modalRincian = document.getElementById("modalRincianJurnal");
     if (modalRincian && event.target === modalRincian) {
         tutupRincianJurnal();
     }
 });
-}
+// HAPUS KURUNG KURAWAL TERAKHIR YANG TIDAK PERLU!
         
     </script>
 
