@@ -1451,23 +1451,24 @@ async function bukaLaporan() {
         console.log("--> 1. Biodata Guru Ditemukan:", infoGuru);
 
         if (infoGuru) {
-            // 2. GABUNGKAN SELURUH ISI PROPERTI BIODATA MENJADI SATU TEKS
-            // Apapun nama kolomnya di Google Sheets, semua nilainya disatukan di sini
-            const semuaNilaiBiodata = Object.values(infoGuru).join(" ").toUpperCase();
-            console.log("--> 2. Teks Biodata Lengkap:", semuaNilaiBiodata);
+            // 2. GABUNGKAN SELURUH ISI PROPERTI BIODATA 
+            const semuaNilaiBiodata = Object.values(infoGuru).join(" ");
 
+            // Helper: Hapus SEMUA spasi, strip (-), dan karakter non-huruf/angka
+            const bersihkanTotal = s => String(s).toUpperCase().replace(/[^A-Z0-9]/g, '');
+
+            const semuaNilaiBiodataClean = bersihkanTotal(semuaNilaiBiodata);
             const daftarKelas = Object.keys(dataDariSpreadsheet.rekapKelas);
-            console.log("--> 3. Daftar Kelas di RekapKelas:", daftarKelas);
 
             let kelasDitemukan = null;
             let dataKelas = null;
 
-            // 3. COCOKKAN DENGAN DAFTAR KELAS
+            // 3. COCOKKAN DENGAN DAFTAR KELAS (Sudah Kebal Strip & Spasi)
             for (let i = 0; i < daftarKelas.length; i++) {
                 let namaKelasAsli = daftarKelas[i]; 
-                let namaKelasClean = namaKelasAsli.toUpperCase().trim();
+                let namaKelasClean = bersihkanTotal(namaKelasAsli);
 
-                if (semuaNilaiBiodata.includes(namaKelasClean)) {
+                if (namaKelasClean && semuaNilaiBiodataClean.includes(namaKelasClean)) {
                     kelasDitemukan = namaKelasAsli;
                     dataKelas = dataDariSpreadsheet.rekapKelas[namaKelasAsli];
                     break;
