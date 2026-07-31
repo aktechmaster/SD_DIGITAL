@@ -907,6 +907,30 @@
     </div>
 </div>
 
+    <div id="modalRincianJurnal" class="modal" style="display: none; position: fixed; z-index: 9999; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.6); backdrop-filter: blur(3px);">
+    <div class="modal-content" style="background-color: #fff; margin: 5% auto; padding: 25px; border-radius: 12px; width: 90%; max-width: 500px; box-shadow: 0 10px 25px rgba(0,0,0,0.3); position: relative;">
+        <span onclick="tutupRincianJurnal()" style="color: #7f8c8d; position: absolute; right: 20px; top: 15px; font-size: 28px; font-weight: bold; cursor: pointer; transition: 0.3s;">&times;</span>
+        
+        <h3 style="margin-bottom: 5px; color: #2c3e50; font-size: 1.3em;">Rekap Bulanan Jurnal</h3>
+        <p id="nama-guru-jurnal" style="margin-bottom: 20px; color: #16a085; font-weight: 600; font-size: 0.95em;"></p>
+        
+        <div style="overflow-x: auto;">
+            <table style="width: 100%; border-collapse: collapse; text-align: center; font-size: 0.9em;">
+                <thead>
+                    <tr style="background: linear-gradient(to right, #00c6ff, #0072ff); color: white;">
+                        <th style="padding: 12px 8px; border: 1px solid #ddd; border-top-left-radius: 8px;">Bulan</th>
+                        <th style="padding: 12px 8px; border: 1px solid #ddd;">Wajib Diisi</th>
+                        <th style="padding: 12px 8px; border: 1px solid #ddd;">Realisasi</th>
+                        <th style="padding: 12px 8px; border: 1px solid #ddd; border-top-right-radius: 8px;">Persen</th>
+                    </tr>
+                </thead>
+                <tbody id="tabel-body-jurnal">
+                    </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
     <div id="modalDetailAbsensi" class="modal-overlay" style="display: none;">
   <div class="modal-box">
     <div class="modal-header">
