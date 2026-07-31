@@ -1422,113 +1422,117 @@ async function bukaLaporan() {
     }
 
     // ==========================================
-    // BAGIAN 5 (STATUS INPUT) & 6 (REKAP KELAS)
+    // BAGIAN 5 (STATUS INPUT) & 6 (REKAP KELAS) - FIX AKURAT
     // ==========================================
     const divInput = document.getElementById('card-status-input'); 
     const divRekap = document.getElementById('row-rekap-kelas');   
-    
+
     if(divInput) divInput.style.display = 'none';
     if(divRekap) divRekap.style.display = 'none';
 
-    // 1. Ambil biodata guru (dengan pencarian fleksibel jika nama persis tidak ketemu)
-    let infoGuru = dataDariSpreadsheet.biodata?.[namaGuru];
-    if (!infoGuru && dataDariSpreadsheet.biodata) {
-        const bersihkanString = s => String(s).toLowerCase().replace(/[^a-z0-9]/g, '');
-        const targetNama = bersihkanString(namaGuru);
-        for (let key in dataDariSpreadsheet.biodata) {
-            if (bersihkanString(key) === targetNama) {
-                infoGuru = dataDariSpreadsheet.biodata[key];
-                break;
-            }
-        }
-    }
-
-    // 2. Jika biodata dan rekapKelas ada
-    if (infoGuru && dataDariSpreadsheet.rekapKelas) {
-        const txtJabatan = infoGuru.jabatan || infoGuru.jabatanUtama || "";
-        const txtTugas = infoGuru.tugasTambahan || "";
-        const teksGabungan = (txtJabatan + " " + txtTugas).toUpperCase();
+    if (dataDariSpreadsheet && dataDariSpreadsheet.biodata && dataDariSpreadsheet.rekapKelas) {
         
-        // Helper untuk membersihkan tanda baca/strip agar misal "5 AL-BAHRI 2" cocok dengan "5 AL BAHRI 2"
-        const bersihkanKelas = s => String(s).toUpperCase().replace(/[^A-Z0-9]/g, '');
-        const teksPencarianClean = bersihkanKelas(teksGabungan);
-
-        const daftarKelas = Object.keys(dataDariSpreadsheet.rekapKelas);
-        let kelasDitemukan = null;
-        let dataKelas = null;
-
-        for (let i = 0; i < daftarKelas.length; i++) {
-            let namaKelasAsli = daftarKelas[i];
-            let namaKelasClean = bersihkanKelas(namaKelasAsli);
+        // 1. CARI BIODATA GURU (Pencarian Fleksibel/Toleran Gelar & Spasi)
+        let infoGuru = dataDariSpreadsheet.biodata[namaGuru];
+        
+        if (!infoGuru) {
+            const bersihkanNama = s => String(s).toLowerCase().replace(/[^a-z]/g, '');
+            const targetNama = bersihkanNama(namaGuru);
             
-            if (teksPencarianClean.includes(namaKelasClean)) {
-                kelasDitemukan = namaKelasAsli;
-                dataKelas = dataDariSpreadsheet.rekapKelas[namaKelasAsli];
-                break;
+            for (let key in dataDariSpreadsheet.biodata) {
+                const keyClean = bersihkanNama(key);
+                if (keyClean.includes(targetNama) || targetNama.includes(keyClean)) {
+                    infoGuru = dataDariSpreadsheet.biodata[key];
+                    break;
+                }
             }
         }
 
-        // 3. Jika kelas ditemukan, tampilkan Kotak 5 & 6
-        if (kelasDitemukan && dataKelas) {
-            
-            // --- KOTAK 5: STATUS INPUT ---
-            if(divInput) {
-                divInput.style.display = 'block';
-                let jumlahIsi = parseInt(dataKelas.jumlahInput) || 0; 
-                
-                const elStatusVal = document.getElementById('status-input-val');
-                const elStatusMsg = document.getElementById('status-input-msg');
-                const elCardInput = document.getElementById('card-status-input');
+        console.log("--> 1. Biodata Guru Ditemukan:", infoGuru);
 
-                if (jumlahIsi === 0) {
-                    if(elStatusVal) { elStatusVal.innerText = "BELUM MENGISI"; elStatusVal.style.color = "#e74c3c"; }
-                    if(elStatusMsg) elStatusMsg.innerText = "Anda belum mengisi kehadiran siswa hari ini.";
-                    if(elCardInput) elCardInput.style.borderLeftColor = "#e74c3c"; 
-                } else if (jumlahIsi === 1) {
-                    if(elStatusVal) { elStatusVal.innerText = "SUDAH MENGISI"; elStatusVal.style.color = "#27ae60"; }
-                    if(elStatusMsg) elStatusMsg.innerText = "Terima kasih, data kehadiran hari ini aman.";
-                    if(elCardInput) elCardInput.style.borderLeftColor = "#27ae60";
-                } else {
-                    if(elStatusVal) { elStatusVal.innerText = "DOUBLE INPUT (" + jumlahIsi + ")"; elStatusVal.style.color = "#f39c12"; }
-                    if(elStatusMsg) elStatusMsg.innerText = "Anda mengisi lebih dari 1 jurnal kelas hari ini.";
-                    if(elCardInput) elCardInput.style.borderLeftColor = "#f39c12";
+        if (infoGuru) {
+            // 2. GABUNGKAN SELURUH ISI PROPERTI BIODATA MENJADI SATU TEKS
+            // Apapun nama kolomnya di Google Sheets, semua nilainya disatukan di sini
+            const semuaNilaiBiodata = Object.values(infoGuru).join(" ").toUpperCase();
+            console.log("--> 2. Teks Biodata Lengkap:", semuaNilaiBiodata);
+
+            const daftarKelas = Object.keys(dataDariSpreadsheet.rekapKelas);
+            console.log("--> 3. Daftar Kelas di RekapKelas:", daftarKelas);
+
+            let kelasDitemukan = null;
+            let dataKelas = null;
+
+            // 3. COCOKKAN DENGAN DAFTAR KELAS
+            for (let i = 0; i < daftarKelas.length; i++) {
+                let namaKelasAsli = daftarKelas[i]; 
+                let namaKelasClean = namaKelasAsli.toUpperCase().trim();
+
+                if (semuaNilaiBiodata.includes(namaKelasClean)) {
+                    kelasDitemukan = namaKelasAsli;
+                    dataKelas = dataDariSpreadsheet.rekapKelas[namaKelasAsli];
+                    break;
                 }
             }
 
-            // --- KOTAK 6: REKAP KELAS ---
-            if(divRekap) {
-                window.kelasAktif = kelasDitemukan;
-                divRekap.style.display = 'block';
-                
-                const elLabel = document.getElementById('label-rekap-kelas');
-                const elVal = document.getElementById('val-rekap-kelas');
-                const elBar = document.getElementById('bar-rekap-kelas');
-                const elDetail = document.getElementById('detail-rekap-kelas');
+            console.log("--> 4. Hasil Pencocokan Kelas:", kelasDitemukan, dataKelas);
 
-                if(elLabel) elLabel.textContent = "Rekap Kehadiran " + kelasDitemukan;
+            // 4. JIKA KELAS DITEMUKAN, TAMPILKAN KOTAK 5 & 6
+            if (kelasDitemukan && dataKelas) {
                 
-                var teksTampil = dataKelas.tampilan || "0%";
-                var lebarBar = dataKelas.persen || "0%";
+                // --- KOTAK 5: STATUS INPUT ---
+                if(divInput) {
+                    divInput.style.display = 'block';
+                    let jumlahIsi = parseInt(dataKelas.jumlahInput) || 0; 
+                    
+                    const elStatusVal = document.getElementById('status-input-val');
+                    const elStatusMsg = document.getElementById('status-input-msg');
+                    const elCardInput = document.getElementById('card-status-input');
 
-                if(elVal) elVal.textContent = teksTampil;
-                if(elBar) {
-                    elBar.style.width = lebarBar;
-                    if (parseFloat(lebarBar) < 75) {
-                        elBar.style.backgroundColor = "#e74c3c";
-                        if(elDetail) elDetail.textContent = "Perlu Perhatian";
+                    if (jumlahIsi === 0) {
+                        if(elStatusVal) { elStatusVal.innerText = "BELUM MENGISI"; elStatusVal.style.color = "#e74c3c"; }
+                        if(elStatusMsg) elStatusMsg.innerText = "Anda belum mengisi kehadiran siswa hari ini.";
+                        if(elCardInput) elCardInput.style.borderLeftColor = "#e74c3c"; 
+                    } else if (jumlahIsi === 1) {
+                        if(elStatusVal) { elStatusVal.innerText = "SUDAH MENGISI"; elStatusVal.style.color = "#27ae60"; }
+                        if(elStatusMsg) elStatusMsg.innerText = "Terima kasih, data kehadiran hari ini aman.";
+                        if(elCardInput) elCardInput.style.borderLeftColor = "#27ae60";
                     } else {
-                        elBar.style.backgroundColor = "#27ae60";
-                        if(elDetail) elDetail.textContent = "Sangat Baik";
+                        if(elStatusVal) { elStatusVal.innerText = "DOUBLE INPUT (" + jumlahIsi + ")"; elStatusVal.style.color = "#f39c12"; }
+                        if(elStatusMsg) elStatusMsg.innerText = "Anda mengisi lebih dari 1 jurnal kelas hari ini.";
+                        if(elCardInput) elCardInput.style.borderLeftColor = "#f39c12";
+                    }
+                }
+
+                // --- KOTAK 6: REKAP KELAS ---
+                if(divRekap) {
+                    window.kelasAktif = kelasDitemukan;
+                    divRekap.style.display = 'block';
+                    
+                    const elLabel = document.getElementById('label-rekap-kelas');
+                    const elVal = document.getElementById('val-rekap-kelas');
+                    const elBar = document.getElementById('bar-rekap-kelas');
+                    const elDetail = document.getElementById('detail-rekap-kelas');
+
+                    if(elLabel) elLabel.textContent = "Rekap Kehadiran " + kelasDitemukan;
+                    
+                    var teksTampil = dataKelas.tampilan || "0%";
+                    var lebarBar = dataKelas.persen || "0%";
+
+                    if(elVal) elVal.textContent = teksTampil;
+                    if(elBar) {
+                        elBar.style.width = lebarBar;
+                        if (parseFloat(lebarBar) < 75) {
+                            elBar.style.backgroundColor = "#e74c3c";
+                            if(elDetail) elDetail.textContent = "Perlu Perhatian";
+                        } else {
+                            elBar.style.backgroundColor = "#27ae60";
+                            if(elDetail) elDetail.textContent = "Sangat Baik";
+                        }
                     }
                 }
             }
-        } else {
-            console.warn("Wali Kelas tidak cocok. Jabatan Guru:", teksGabungan, "| Daftar kelas yang ada:", daftarKelas);
         }
-    } else {
-        console.warn("Biodata guru tidak ditemukan untuk nama:", namaGuru);
     }
-}
 
 function tutupLaporan() {
     document.getElementById("modalLaporan").style.display = "none";
