@@ -1769,7 +1769,7 @@ function prosesUbahPassword() {
     });
 }
 
-       // === FUNGSI POPUP ABSENSI ===
+       // === FUNGSI ABSENSI ===
 window.bukaPopupAbsensi = function() {
     var kelas = window.kelasAktif;
     if (!kelas) {
@@ -1820,13 +1820,12 @@ window.bukaPopupAbsensi = function() {
     });
 };
 
-// === FUNGSI TUTUP ABSENSI ===
 window.tutupDetailAbsensi = function() {
     const modal = document.getElementById('modalDetailAbsensi');
     if (modal) modal.style.display = 'none';
 };
 
-// === FUNGSI BUKA JURNAL ===
+// === FUNGSI JURNAL ===
 window.bukaRincianJurnal = function() {
     const tbody = document.getElementById("tabel-body-jurnal");
     const elemNamaGuru = document.getElementById("nama-guru-jurnal");
@@ -1893,19 +1892,21 @@ window.bukaRincianJurnal = function() {
     if (modalRincian) modalRincian.style.display = "block";
 };
 
-// === FUNGSI TUTUP JURNAL ===
 window.tutupRincianJurnal = function() {
     const modal = document.getElementById('modalRincianJurnal');
     if (modal) modal.style.display = 'none';
 };
 
-// === TUTUP JIKALAU KLIK AREA LUAR MODAL ===
+// === FUNGSI BUKA LAPORAN ===
+window.bukaLaporan = function() {
+    // Isi fungsi buka laporan kamu di sini
+};
+
+// === TUTUP KLIK LUAR ===
 window.addEventListener('click', function(event) {
-    // Tutup Absensi
     const absen = document.getElementById('modalDetailAbsensi');
     if (absen && event.target === absen) tutupDetailAbsensi();
 
-    // Tutup Jurnal
     const jurnal = document.getElementById('modalRincianJurnal');
     if (jurnal && event.target === jurnal) tutupRincianJurnal();
 });
