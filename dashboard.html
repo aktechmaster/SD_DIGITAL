@@ -1952,47 +1952,38 @@ window.addEventListener('click', function(event) {
     }
 });
 }
-    // --- FUNGSI UNTUK MENUTUP MODAL LAPORAN ---
+    // --- 1. FUNGSI PENUTUP LAPORAN ---
 function tutupLaporan() {
-    // 1. Cari elemen modal laporan berdasarkan ID
-    const modal = document.getElementById('modal-laporan') || 
-                  document.getElementById('modalLaporan') ||
-                  document.getElementById('modalKinerja');
-
-    if (modal) {
-        modal.style.display = 'none';
-    } else {
-        // 2. Fallback otomatis jika nama ID modal kamu berbeda
-        const tombolClose = document.querySelector('[onclick*="tutupLaporan"]');
-        if (tombolClose) {
-            const overlayModal = tombolClose.closest('.modal, .modal-overlay, [id*="modal"], [class*="modal"]');
-            if (overlayModal) overlayModal.style.display = 'none';
-        }
-    }
+    const modal = document.getElementById("modalLaporan");
+    if (modal) modal.style.display = "none";
 }
 
-// Pastikan fungsi ini terdaftar secara global di window
-window.tutupLaporan = tutupLaporan;
-
-        // --- FUNGSI PEMBUKA POPUP REKAP KEHADIRAN SISWA ---
+// --- 2. FUNGSI PEMBUKA POPUP RINCIAN ABSENSI SISWA ---
 function bukaPopupAbsensi() {
-    // Cari elemen modal rekap absensi berdasarkan ID yang ada
-    const modal = document.getElementById('modalAbsensi') || 
-                  document.getElementById('modalPopupAbsen') ||
-                  document.getElementById('modalRincianAbsen') ||
-                  document.getElementById('modalDetailAbsen') ||
-                  document.getElementById('modal-absen');
+    const kelas = window.kelasAktif;
+    
+    // Jika ada fungsi bawaan untuk membuka rincian jurnal/absensi kelas
+    if (typeof tampilkanRincianJurnal === 'function') {
+        tampilkanRincianJurnal(kelas);
+        return;
+    }
+    if (typeof cekAksesAbsensi === 'function') {
+        cekAksesAbsensi();
+        return;
+    }
 
-    if (modal) {
-        modal.style.display = 'block'; // atau 'flex'
+    // Jika menggunakan modal popup rincian
+    const modalRincian = document.getElementById("modalRincianJurnal") || 
+                         document.getElementById("modalAbsensi");
+    if (modalRincian) {
+        modalRincian.style.display = "block";
     } else {
-        // Fallback jika ID memakai class modal
-        const modalClass = document.querySelector('.modal-absensi, .modal-absen, #modalRincianJurnal');
-        if (modalClass) modalClass.style.display = 'block';
+        alert("Menampilkan rincian absensi untuk kelas " + (kelas || "ini"));
     }
 }
 
-// Daftarkan ke window global agar bisa dipanggil tombol 'onclick'
+// Mendaftarkan fungsi ke window global agar aman dipanggil atribut 'onclick'
+window.tutupLaporan = tutupLaporan;
 window.bukaPopupAbsensi = bukaPopupAbsensi;
         
     </script>
