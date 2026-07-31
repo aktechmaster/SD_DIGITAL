@@ -1895,6 +1895,27 @@ function bukaRincianJurnal() {
         modalRincian.style.display = "block";
     }
 }
+
+        // ==========================================
+// FUNGSI PENUTUP MODAL (PASTIKAN GLOBAL)
+// ==========================================
+function tutupRincianJurnal() {
+    const modalRincian = document.getElementById("modalRincianJurnal");
+    if (modalRincian) {
+        modalRincian.style.display = "none";
+    }
+}
+
+// Mendaftarkan fungsi ke 'window' agar pasti terbaca oleh tag onclick HTML
+window.tutupRincianJurnal = tutupRincianJurnal;
+
+// Menutup modal otomatis jika area hitam luar popup diklik
+window.addEventListener('click', function(event) {
+    const modalRincian = document.getElementById("modalRincianJurnal");
+    if (modalRincian && event.target === modalRincian) {
+        tutupRincianJurnal();
+    }
+});
         
     </script>
 
