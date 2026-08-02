@@ -1745,7 +1745,7 @@ window.bukaPopupAbsensi = function() {
     if (!kelas) { alert("Kelas tidak ditemukan. Refresh halaman."); return; }
 
     var modal = document.getElementById('modalDetailAbsensi');
-    if(modal) modal.style.display = 'block'; // Dikembalikan ke block agar tidak kejang
+    if(modal) modal.style.display = 'flex'; // Dikembalikan ke block agar tidak kejang
     
     var elJudul = document.getElementById('judulDetailKelas');
     if(elJudul) elJudul.innerText = "Detail: " + kelas;
