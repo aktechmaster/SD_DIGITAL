@@ -1332,9 +1332,9 @@ async function bukaLaporan() {
         return;
     }
 
-    // 3. Buka Modal Laporan
-    const modal = document.getElementById("modalLaporan");
-    if (modal) modal.style.display = "block";
+    // 3. Buka Modal Laporan (DIUBAH KE KINERJA DAN FLEX AGAR DESAIN RAPI)
+    const modal = document.getElementById("modalLaporanKinerja") || document.getElementById("modalLaporan");
+    if (modal) modal.style.display = "flex";
 
     // --- BAGIAN 1: JURNAL HARIAN ---
     const dataHarian = dataDariSpreadsheet.jurnalHarian?.[namaGuru];
@@ -1536,10 +1536,6 @@ if (dataDariSpreadsheet && dataDariSpreadsheet.biodata && dataDariSpreadsheet.re
 }
 // ✅ HANYA MENAMBAHKAN KURUNG PENUTUP YANG HILANG, LOGIKA KAMU TETAP 100%
 
-// === FUNGSI LAPORAN KINERJA - DIDAFTARKAN KE WINDOW ===
-window.bukaLaporan = function() {
-    document.getElementById("modalLaporanKinerja").style.display = "flex";
-};
 window.tutupLaporan = function() {
     document.getElementById("modalLaporanKinerja").style.display = "none";
 };
@@ -1609,7 +1605,7 @@ showDate();
 // ==========================================
 // LOGIKA JADWAL MENGAJAR - DIDAFTARKAN KE WINDOW
 // ==========================================
-window.bukaJadwalMengajar = function() {
+JadwalMengajar = function() {
     // 1. Cek apakah data sudah siap
     if (!dataDariSpreadsheet) {
         showPopup("Mohon Tunggu", "Data sedang diambil dari server...", "⏳");
@@ -1688,7 +1684,7 @@ window.addEventListener('click', function(e) {
 // ==========================================
 // LOGIKA UBAH PASSWORD - DIDAFTARKAN KE WINDOW
 // ==========================================
-window.bukaModalPassword = function() {
+ModalPassword = function() {
     document.getElementById("modalPassword").style.display = "block";
     document.getElementById("input-pass-baru").value = ""; // Reset input
 };
@@ -1761,7 +1757,7 @@ window.prosesUbahPassword = function() {
 };
 
 // === FUNGSI POPUP ABSENSI - DIDAFTARKAN KE WINDOW ===
-window.bukaPopupAbsensi = function() {
+PopupAbsensi = function() {
     var kelas = window.kelasAktif;
     if (!kelas) {
         try {
@@ -1817,7 +1813,7 @@ window.tutupDetailAbsensi = function() {
 };
 
 // === FUNGSI JURNAL - DIDAFTARKAN KE WINDOW ===
-window.bukaRincianJurnal = function() {
+RincianJurnal = function() {
     const tbody = document.getElementById("tabel-body-jurnal");
     const elemNamaGuru = document.getElementById("nama-guru-jurnal");
     const modalRincian = document.getElementById("modalRincianJurnal");
@@ -1908,7 +1904,6 @@ window.addEventListener('click', function(event) {
     const pass = document.getElementById('modalPassword');
     if (pass && event.target === pass) tutupModalPassword();
 });
-}
         
     </script>
 
