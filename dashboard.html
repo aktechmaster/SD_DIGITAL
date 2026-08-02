@@ -1608,7 +1608,7 @@ showDate();
 // ==========================================
 // LOGIKA JADWAL MENGAJAR
 // ==========================================
-window.bukaJadwal = function() {
+window.bukaJadwalMengajar = function() {
     if (!dataDariSpreadsheet) {
         if(typeof showPopup === "function") showPopup("Mohon Tunggu", "Data sedang diambil dari server...", "⏳");
         else alert("Data sedang diambil dari server...");
@@ -1734,7 +1734,7 @@ window.prosesUbahPassword = function() {
 // ==========================================
 // FUNGSI POPUP ABSENSI DETAIL
 // ==========================================
-window.bukaDetailAbsensi = function() {
+window.bukaPopupAbsensi = function() {
     var kelas = window.kelasAktif;
     if (!kelas) {
         try {
