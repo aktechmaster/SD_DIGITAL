@@ -7,145 +7,164 @@
     
     <link rel="icon" href="logosmpit.png" type="image/png">
     <style>
-        /* Reset dasar */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
+    /* Reset dasar */
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
 
-        body {
-            /* Latar belakang nuansa teknologi gelap */
-            background: linear-gradient(135deg, #0f2027 0%, #203a43 50%, #2c5364 100%);
-            height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            overflow: hidden;
-            position: relative;
-        }
+    body {
+        /* PERUBAHAN: Latar belakang gradasi krem hangat ke hijau sangat lembut */
+        background: linear-gradient(135deg, #fdfbf7 0%, #f4f4e9 50%, #e0e5d6 100%);
+        height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        overflow: hidden;
+        position: relative;
+    }
 
-        /* Elemen dekoratif latar belakang (lingkaran cahaya) */
-        .circle {
-            position: absolute;
-            border-radius: 50%;
-            background: linear-gradient(to right, #00c6ff, #0072ff);
-            opacity: 0.4;
-            filter: blur(80px);
-            z-index: 0;
-        }
-        .c1 { width: 300px; height: 300px; top: 10%; left: 20%; }
-        .c2 { width: 250px; height: 250px; bottom: 10%; right: 20%; background: linear-gradient(to right, #7f00ff, #e100ff); }
+    /* Elemen dekoratif latar belakang (lingkaran cahaya) */
+    .circle {
+        position: absolute;
+        border-radius: 50%;
+        opacity: 0.6; /* Opacity dinaikkan sedikit untuk latar terang */
+        filter: blur(80px);
+        z-index: 0;
+    }
+    /* PERUBAHAN: Lingkaran kiri atas (Hijau Sage lembut) */
+    .c1 { 
+        width: 300px; height: 300px; top: 10%; left: 20%; 
+        background: linear-gradient(to right, #d4e0c9, #a3b18a);
+    }
+    /* PERUBAHAN: Lingkaran kanan bawah (Krem/Earth tone) */
+    .c2 { 
+        width: 250px; height: 250px; bottom: 10%; right: 20%; 
+        background: linear-gradient(to right, #faedcd, #e9edc9); 
+    }
 
-        /* Wadah Login (Efek Glassmorphism) */
-        .login-container {
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(15px);
-            -webkit-backdrop-filter: blur(15px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 20px;
-            padding: 40px;
-            width: 400px;
-            text-align: center;
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
-            z-index: 1;
-            color: #fff;
-        }
+    /* Wadah Login (Efek Glassmorphism Terang) */
+    .login-container {
+        /* PERUBAHAN: Efek kaca disesuaikan jadi lebih putih/terang */
+        background: rgba(255, 255, 255, 0.65);
+        backdrop-filter: blur(15px);
+        -webkit-backdrop-filter: blur(15px);
+        border: 1px solid rgba(255, 255, 255, 0.9);
+        border-radius: 20px;
+        padding: 40px;
+        width: 400px;
+        text-align: center;
+        /* PERUBAHAN: Bayangan diubah ke nuansa hijau gelap transparan */
+        box-shadow: 0 15px 35px rgba(88, 129, 87, 0.1);
+        z-index: 1;
+        /* PERUBAHAN: Warna teks utama diubah menjadi Hijau Tua/Abu Gelap */
+        color: #344e41; 
+    }
 
-        /* Wadah  Baru */
-        .-container {
-            margin: 0 auto 20px;
-            text-align: center;
-        }
-        
-        /* Gaya Gambar  */
-        .-img {
-            width: 80px;
-            height: 80px;
-            object-fit: contain; /* Menjaga proporsi gambar */
-            filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.5)); /* Efek cahaya pada  */
-        }
+    /* Wadah Logo */
+    .-container {
+        margin: 0 auto 20px;
+        text-align: center;
+    }
+    
+    /* Gaya Gambar Logo */
+    .-img {
+        width: 80px;
+        height: 80px;
+        object-fit: contain; 
+        /* PERUBAHAN: Drop shadow disesuaikan untuk latar terang */
+        filter: drop-shadow(0 5px 10px rgba(88, 129, 87, 0.2)); 
+    }
 
-        h2 {
-            margin-bottom: 5px;
-            font-weight: 600;
-            letter-spacing: 1px;
-        }
-        
-        p.subtitle {
-            font-size: 0.9em;
-            color: #ddd;
-            margin-bottom: 30px;
-        }
+    h2 {
+        margin-bottom: 5px;
+        font-weight: 600;
+        letter-spacing: 1px;
+    }
+    
+    p.subtitle {
+        font-size: 0.9em;
+        /* PERUBAHAN: Warna subtitle menjadi hijau pucat elegan */
+        color: #588157; 
+        margin-bottom: 30px;
+    }
 
-        /* Input Form */
-        .input-group {
-            position: relative;
-            margin-bottom: 20px;
-            text-align: left;
-        }
+    /* Input Form */
+    .input-group {
+        position: relative;
+        margin-bottom: 20px;
+        text-align: left;
+    }
 
-        .input-group label {
-            display: block;
-            margin-bottom: 8px;
-            font-size: 0.9em;
-            color: #b0c4de;
-        }
+    .input-group label {
+        display: block;
+        margin-bottom: 8px;
+        font-size: 0.9em;
+        /* PERUBAHAN: Warna teks label */
+        color: #4a5d4e; 
+    }
 
-        .input-group input {
-            width: 100%;
-            padding: 12px 15px;
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 8px;
-            color: #fff;
-            font-size: 1em;
-            outline: none;
-            transition: 0.3s;
-        }
+    .input-group input {
+        width: 100%;
+        padding: 12px 15px;
+        /* PERUBAHAN: Latar belakang input sedikit putih */
+        background: rgba(255, 255, 255, 0.8);
+        border: 1px solid rgba(163, 177, 138, 0.6);
+        border-radius: 8px;
+        /* PERUBAHAN: Teks input pengguna */
+        color: #2b3a30; 
+        font-size: 1em;
+        outline: none;
+        transition: 0.3s;
+    }
 
-        .input-group input:focus {
-            background: rgba(255, 255, 255, 0.1);
-            border-color: #00c6ff;
-            box-shadow: 0 0 10px rgba(0, 198, 255, 0.3);
-        }
+    .input-group input:focus {
+        background: #ffffff;
+        /* PERUBAHAN: Efek glowing saat fokus jadi hijau lembut */
+        border-color: #588157;
+        box-shadow: 0 0 10px rgba(88, 129, 87, 0.2);
+    }
 
-        /* Tombol Login */
-        .btn-login {
-            width: 100%;
-            padding: 12px;
-            background: linear-gradient(to right, #00c6ff, #0072ff);
-            border: none;
-            border-radius: 8px;
-            color: #fff;
-            font-size: 1em;
-            font-weight: bold;
-            cursor: pointer;
-            transition: transform 0.2s, box-shadow 0.2s;
-            margin-top: 10px;
-        }
+    /* Tombol Login */
+    .btn-login {
+        width: 100%;
+        padding: 12px;
+        /* PERUBAHAN: Gradasi tombol jadi hijau segar/daun */
+        background: linear-gradient(to right, #8a9a5b, #588157);
+        border: none;
+        border-radius: 8px;
+        color: #fff;
+        font-size: 1em;
+        font-weight: bold;
+        cursor: pointer;
+        transition: transform 0.2s, box-shadow 0.2s;
+        margin-top: 10px;
+    }
 
-        .btn-login:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0, 198, 255, 0.4);
-        }
+    .btn-login:hover {
+        transform: translateY(-2px);
+        /* PERUBAHAN: Bayangan hijau saat di-hover */
+        box-shadow: 0 5px 15px rgba(88, 129, 87, 0.3);
+    }
 
-        /* Footer kecil */
-        .footer {
-            margin-top: 20px;
-            font-size: 0.8em;
-            color: rgba(255, 255, 255, 0.5);
-        }
-        
-        /* Pesan Error */
-        #error-msg {
-            color: #ff6b6b;
-            font-size: 0.9em;
-            margin-top: 10px;
-            display: none;
-        }
-    </style>
+    /* Footer kecil */
+    .footer {
+        margin-top: 20px;
+        font-size: 0.8em;
+        /* PERUBAHAN: Warna footer lebih tegas dari latar */
+        color: rgba(52, 78, 65, 0.7);
+    }
+    
+    /* Pesan Error */
+    #error-msg {
+        color: #d9534f;
+        font-size: 0.9em;
+        margin-top: 10px;
+        display: none;
+    }
+</style>
 </head>
 <body>
 
