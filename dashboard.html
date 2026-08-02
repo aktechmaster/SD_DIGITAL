@@ -1505,29 +1505,30 @@ if (dataDariSpreadsheet && dataDariSpreadsheet.biodata && dataDariSpreadsheet.re
             }
 
             // --- KOTAK 6: REKAP KELAS ---
-            if(divRekap) {
-                window.kelasAktif = kelasDitemukan;
-                divRekap.style.display = 'block';
-                
-                const elLabel = document.getElementById('label-rekap-kelas');
-                const elVal = document.getElementById('val-rekap-kelas');
-                const elBar = document.getElementById('bar-rekap-kelas');
-                const elDetail = document.getElementById('detail-rekap-kelas');
-
-                if(elLabel) elLabel.textContent = "Rekap Kehadiran " + kelasDitemukan;
-                
-                var teksTampil = dataKelas.tampilan || "0%";
-                var lebarBar = dataKelas.persen || "0%";
-
-                if(elVal) elVal.textContent = teksTampil;
-                if(elBar) {
-                    elBar.style.width = lebarBar;
-                    if (parseFloat(lebarBar) < 75) {
-                        elBar.style.backgroundColor = "#e74c3c";
-                        if(elDetail) elDetail.textContent = "Perlu Perhatian";
-                    } else {
-                        elBar.style.backgroundColor = "#27ae60";
-                        if(elDetail) elDetail.textContent = "Sangat Baik";
+                if(divRekap) {
+                    window.kelasAktif = kelasDitemukan;
+                    divRekap.style.display = 'block';
+                    
+                    const elLabel = document.getElementById('label-rekap-kelas');
+                    const elVal = document.getElementById('val-rekap-kelas');
+                    const elBar = document.getElementById('bar-rekap-kelas');
+                    const elDetail = document.getElementById('detail-rekap-kelas');
+    
+                    if(elLabel) elLabel.textContent = "Rekap Kehadiran " + kelasDitemukan;
+                    
+                    var teksTampil = dataKelas.tampilan || "0%";
+                    var lebarBar = dataKelas.persen || "0%";
+    
+                    if(elVal) elVal.textContent = teksTampil;
+                    if(elBar) {
+                        elBar.style.width = lebarBar;
+                        if (parseFloat(lebarBar) < 75) {
+                            elBar.style.backgroundColor = "#e74c3c";
+                            if(elDetail) elDetail.textContent = "Perlu Perhatian";
+                        } else {
+                            elBar.style.backgroundColor = "#27ae60";
+                            if(elDetail) elDetail.textContent = "Sangat Baik";
+                        }
                     }
                 }
             }
