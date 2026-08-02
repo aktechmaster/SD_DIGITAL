@@ -1332,10 +1332,10 @@ async function bukaLaporan() {
         return;
     }
 
-    // 3. Buka Modal Laporan (DIUBAH KE KINERJA DAN FLEX AGAR DESAIN RAPI)
+    // 3. Buka Modal Laporan
     const modal = document.getElementById("modalLaporanKinerja") || document.getElementById("modalLaporan");
-    if (modal) modal.style.display = "flex";
-
+    if (modal) modal.style.display = "block"; // <--- KEMBALIKAN KE "block"
+    
     // --- BAGIAN 1: JURNAL HARIAN ---
     const dataHarian = dataDariSpreadsheet.jurnalHarian?.[namaGuru];
     const elValHarian = document.getElementById("val-jurnal-harian");
@@ -1550,7 +1550,7 @@ window.bukaBiodata = function() {
     }
 
     const modal = document.getElementById("modalBiodata");
-    modal.style.display = "block";
+    if (modal) modal.style.display = "block";
 
     const bio = dataDariSpreadsheet.biodata[namaGuru];
     document.getElementById("bio-nama").innerText = namaGuru; 
@@ -1585,7 +1585,8 @@ window.bukaBiodata = function() {
 };
 
 window.tutupBiodata = function() {
-    document.getElementById("modalBiodata").style.display = "none";
+    const modal = document.getElementById("modalBiodata");
+    if(modal) modal.style.display = "none";
 };
 
 window.logout = function() {
@@ -1595,20 +1596,21 @@ window.logout = function() {
 
 function showDate() {
     const dateElement = document.getElementById('display-tanggal');
-    const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-    const today = new Date();
-    dateElement.innerText = today.toLocaleDateString('id-ID', options);
+    if(dateElement) {
+        const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+        const today = new Date();
+        dateElement.innerText = today.toLocaleDateString('id-ID', options);
+    }
 }
-
 showDate();
 
 // ==========================================
-// LOGIKA JADWAL MENGAJAR - DIDAFTARKAN KE WINDOW
+// LOGIKA JADWAL MENGAJAR
 // ==========================================
-JadwalMengajar = function() {
-    // 1. Cek apakah data sudah siap
+window.bukaJadwal = function() {
     if (!dataDariSpreadsheet) {
-        showPopup("Mohon Tunggu", "Data sedang diambil dari server...", "⏳");
+        if(typeof showPopup === "function") showPopup("Mohon Tunggu", "Data sedang diambil dari server...", "⏳");
+        else alert("Data sedang diambil dari server...");
         return;
     }
 
@@ -1618,29 +1620,22 @@ JadwalMengajar = function() {
     const judulHari = document.getElementById("info-hari");
     const judulModal = document.getElementById("judul-jadwal");
 
-    // 2. Tentukan Hari Ini Secara Otomatis
     const hariIndo = ["Minggu", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"];
     const tgl = new Date();
-    const namaHari = hariIndo[tgl.getDay()]; // Contoh: "Senin"
+    const namaHari = hariIndo[tgl.getDay()]; 
     
-    // Tampilkan Modal
-    modal.style.display = "block";
-    judulModal.innerText = "Jadwal " + namaHari;
-    judulHari.innerText = namaHari + ", " + tgl.toLocaleDateString('id-ID');
-    listContainer.innerHTML = ""; // Bersihkan isi lama
+    if (modal) modal.style.display = "block";
+    if (judulModal) judulModal.innerText = "Jadwal " + namaHari;
+    if (judulHari) judulHari.innerText = namaHari + ", " + tgl.toLocaleDateString('id-ID');
+    if (listContainer) listContainer.innerHTML = ""; 
 
-    // 3. Ambil Data Jadwal Guru Tersebut
     const dataJadwalGuru = dataDariSpreadsheet.jadwalMengajar && dataDariSpreadsheet.jadwalMengajar[namaGuru];
 
-    // Cek apakah ada jadwal di hari tersebut
     if (dataJadwalGuru && dataJadwalGuru[namaHari] && dataJadwalGuru[namaHari].length > 0) {
-        divKosong.style.display = "none";
+        if (divKosong) divKosong.style.display = "none";
         
-        // Loop setiap jam pelajaran
         dataJadwalGuru[namaHari].forEach(function(mapel) {
             let li = document.createElement("li");
-            
-            // Styling kartu jadwal biar cantik
             li.style.background = "#fff";
             li.style.borderLeft = "5px solid #3498db";
             li.style.marginBottom = "10px";
@@ -1650,7 +1645,6 @@ JadwalMengajar = function() {
             li.style.display = "flex";
             li.style.alignItems = "center";
             
-            // Isi Konten
             li.innerHTML = `
                 <div style="margin-right: 15px; color: #3498db;">
                     <i class="far fa-clock fa-lg"></i>
@@ -1659,61 +1653,44 @@ JadwalMengajar = function() {
                     <span style="font-weight:600; color:#2c3e50; font-size:1.05em;">${mapel}</span>
                 </div>
             `;
-            
-            listContainer.appendChild(li);
+            if(listContainer) listContainer.appendChild(li);
         });
-
     } else {
-        // Jika hari libur atau tidak ada jadwal
-        divKosong.style.display = "block";
+        if (divKosong) divKosong.style.display = "block";
     }
 };
 
 window.tutupJadwal = function() {
-    document.getElementById("modalJadwal").style.display = "none";
+    const modal = document.getElementById("modalJadwal");
+    if(modal) modal.style.display = "none";
 };
 
-// Tambahkan listener agar bisa tutup modal saat klik area gelap
-window.addEventListener('click', function(e) {
-    const modalJadwal = document.getElementById("modalJadwal");
-    if (e.target == modalJadwal) {
-        tutupJadwal();
-    }
-});
-
 // ==========================================
-// LOGIKA UBAH PASSWORD - DIDAFTARKAN KE WINDOW
+// LOGIKA UBAH PASSWORD
 // ==========================================
-ModalPassword = function() {
-    document.getElementById("modalPassword").style.display = "block";
-    document.getElementById("input-pass-baru").value = ""; // Reset input
+window.bukaModalPassword = function() {
+    const modal = document.getElementById("modalPassword");
+    if (modal) modal.style.display = "block";
+    const inputBaru = document.getElementById("input-pass-baru");
+    if (inputBaru) inputBaru.value = ""; 
 };
 
 window.tutupModalPassword = function() {
-    document.getElementById("modalPassword").style.display = "none";
+    const modal = document.getElementById("modalPassword");
+    if (modal) modal.style.display = "none";
 };
 
-// Tutup jika klik area gelap
-window.addEventListener('click', function(e) {
-    if (e.target == document.getElementById("modalPassword")) {
-        tutupModalPassword();
-    }
-});
-
 window.prosesUbahPassword = function() {
-    // 1. AMBIL ELEMENT
     const elPassBaru = document.getElementById("input-pass-baru");
     const elPassKonfirmasi = document.getElementById("input-pass-konfirmasi");
     const elMsgError = document.getElementById("msg-beda-pass");
     const namaGuru = localStorage.getItem('namaGuru'); 
 
-    // 2. VALIDASI KOSONG
-    if (!elPassBaru.value || elPassBaru.value.trim() === "") {
+    if (!elPassBaru || !elPassBaru.value || elPassBaru.value.trim() === "") {
         showPopup("Gagal", "Password baru tidak boleh kosong!", "❌");
         return;
     }
 
-    // 3. VALIDASI KECOCOKAN
     if (elPassBaru.value !== elPassKonfirmasi.value) {
         if(elMsgError) elMsgError.style.display = 'block';
         showPopup("Gagal", "Password tidak sama! Cek ketikan Anda.", "❌");
@@ -1724,8 +1701,8 @@ window.prosesUbahPassword = function() {
         if(elMsgError) elMsgError.style.display = 'none';
     }
 
-    // --- KIRIM KE SERVER ---
-    document.getElementById('loading-overlay').style.display = 'flex';
+    const loadingOverlay = document.getElementById('loading-overlay');
+    if(loadingOverlay) loadingOverlay.style.display = 'flex';
     tutupModalPassword();
 
     const formData = new FormData();
@@ -1733,13 +1710,10 @@ window.prosesUbahPassword = function() {
     formData.append('nama', namaGuru);
     formData.append('password', elPassBaru.value);
 
-    fetch(API_, {
-        method: 'POST',
-        body: formData
-    })
+    fetch(API_, { method: 'POST', body: formData })
     .then(response => response.json())
     .then(data => {
-        document.getElementById('loading-overlay').style.display = 'none';
+        if(loadingOverlay) loadingOverlay.style.display = 'none';
         if (data.status === "sukses") {
             showPopup("Berhasil", "Password diganti! Logout otomatis...", "✅");
             setTimeout(() => {
@@ -1751,27 +1725,32 @@ window.prosesUbahPassword = function() {
         }
     })
     .catch(error => {
-        document.getElementById('loading-overlay').style.display = 'none';
+        if(loadingOverlay) loadingOverlay.style.display = 'none';
         showPopup("Error", "Gagal koneksi server.", "🚫");
     });
 };
 
-// === FUNGSI POPUP ABSENSI - DIDAFTARKAN KE WINDOW ===
-PopupAbsensi = function() {
+// ==========================================
+// FUNGSI POPUP ABSENSI DETAIL
+// ==========================================
+window.bukaDetailAbsensi = function() {
     var kelas = window.kelasAktif;
     if (!kelas) {
         try {
             var label = document.getElementById('label-rekap-kelas').textContent;
-            kelas = label.replace("Rekap Kehadiran ", "").trim();
+            if(label) kelas = label.replace("Rekap Kehadiran ", "").trim();
         } catch (e) {}
     }
     if (!kelas) { alert("Kelas tidak ditemukan. Refresh halaman."); return; }
 
     var modal = document.getElementById('modalDetailAbsensi');
-    modal.style.display = 'flex';
-    document.getElementById('judulDetailKelas').innerText = "Detail: " + kelas;
+    if(modal) modal.style.display = 'block'; // Dikembalikan ke block agar tidak kejang
+    
+    var elJudul = document.getElementById('judulDetailKelas');
+    if(elJudul) elJudul.innerText = "Detail: " + kelas;
+    
     var tbody = document.getElementById('isiTabelAbsensi');
-    tbody.innerHTML = '<tr><td colspan="6" style="padding:20px; text-align:center;">Sedang mengambil data... <br>⏳ Mohon tunggu...</td></tr>';
+    if(tbody) tbody.innerHTML = '<tr><td colspan="6" style="padding:20px; text-align:center;">Sedang mengambil data... <br>⏳ Mohon tunggu...</td></tr>';
 
     var urlTujuan = "https://script.google.com/macros/s/AKfycbwqC7MvEayos9s8IdYbcoXF488iQ09-LneUD0DvawKUf6AYIUWPOaI0NvMfNEMQP6JVBA/exec";
     var fullUrl = urlTujuan + "?action=getRekapDetail&kelas=" + encodeURIComponent(kelas);
@@ -1799,11 +1778,10 @@ PopupAbsensi = function() {
                 </tr>`;
             });
         }
-        tbody.innerHTML = html;
+        if(tbody) tbody.innerHTML = html;
     })
     .catch(error => {
-        console.error(error);
-        tbody.innerHTML = '<tr><td colspan="6" style="color:red; padding:20px; text-align:center;">Gagal mengambil data.<br><br><small>Pastikan Script sudah di-Deploy "New Version" & Akses "Anyone".</small></td></tr>';
+        if(tbody) tbody.innerHTML = '<tr><td colspan="6" style="color:red; padding:20px; text-align:center;">Gagal mengambil data.</td></tr>';
     });
 };
 
@@ -1812,16 +1790,15 @@ window.tutupDetailAbsensi = function() {
     if (modal) modal.style.display = 'none';
 };
 
-// === FUNGSI JURNAL - DIDAFTARKAN KE WINDOW ===
-RincianJurnal = function() {
+// ==========================================
+// FUNGSI RINCIAN JURNAL
+// ==========================================
+window.bukaRincianJurnal = function() {
     const tbody = document.getElementById("tabel-body-jurnal");
     const elemNamaGuru = document.getElementById("nama-guru-jurnal");
     const modalRincian = document.getElementById("modalRincianJurnal");
 
-    if (!tbody) {
-        console.error("Error: Elemen ID 'tabel-body-jurnal' tidak ditemukan.");
-        return;
-    }
+    if (!tbody) return;
 
     const sumberData = dataDariSpreadsheet?.rincianJurnal || dataDariSpreadsheet?.jurnalBulanan;
 
@@ -1876,7 +1853,7 @@ RincianJurnal = function() {
         tbody.innerHTML = "<tr><td colspan='4' style='padding:20px; text-align:center; color:#7f8c8d;'>Belum ada data jurnal.</td></tr>";
     }
 
-    if (modalRincian) modalRincian.style.display = "block";
+    if (modalRincian) modalRincian.style.display = "block"; // <-- Gunakan block
 };
 
 window.tutupRincianJurnal = function() {
@@ -1884,28 +1861,29 @@ window.tutupRincianJurnal = function() {
     if (modal) modal.style.display = 'none';
 };
 
-// === TUTUP KETIK KLIK LUAR SEMUA MODAL ===
+// ==========================================
+// TUTUP MODAL KETIKA KLIK AREA GELAP (DISATUKAN AGAR RINGAN)
+// ==========================================
 window.addEventListener('click', function(event) {
-    const laporan = document.getElementById('modalLaporanKinerja');
-    if (laporan && event.target === laporan) tutupLaporan();
+    const daftarmodal = [
+        { id: 'modalLaporanKinerja', close: window.tutupLaporan },
+        { id: 'modalLaporan', close: window.tutupLaporan },
+        { id: 'modalDetailAbsensi', close: window.tutupDetailAbsensi },
+        { id: 'modalRincianJurnal', close: window.tutupRincianJurnal },
+        { id: 'modalBiodata', close: window.tutupBiodata },
+        { id: 'modalJadwal', close: window.tutupJadwal },
+        { id: 'modalPassword', close: window.tutupModalPassword },
+        { id: 'modalPeringatan', close: window.tutupPeringatan }
+    ];
 
-    const absen = document.getElementById('modalDetailAbsensi');
-    if (absen && event.target === absen) tutupDetailAbsensi();
-
-    const jurnal = document.getElementById('modalRincianJurnal');
-    if (jurnal && event.target === jurnal) tutupRincianJurnal();
-
-    const biodata = document.getElementById('modalBiodata');
-    if (biodata && event.target === biodata) tutupBiodata();
-
-    const jadwal = document.getElementById('modalJadwal');
-    if (jadwal && event.target === jadwal) tutupJadwal();
-
-    const pass = document.getElementById('modalPassword');
-    if (pass && event.target === pass) tutupModalPassword();
+    daftarmodal.forEach(m => {
+        const el = document.getElementById(m.id);
+        if (el && event.target === el && typeof m.close === 'function') {
+            m.close();
+        }
+    });
 });
-        
-    </script>
+</script>
 
 </body>
 
