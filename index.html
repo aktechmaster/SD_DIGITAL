@@ -16,7 +16,6 @@
     }
 
     body {
-        /* PERUBAHAN: Latar belakang gradasi krem hangat ke hijau sangat lembut */
         background: linear-gradient(135deg, #fdfbf7 0%, #f4f4e9 50%, #e0e5d6 100%);
         height: 100vh;
         display: flex;
@@ -26,28 +25,25 @@
         position: relative;
     }
 
-    /* Elemen dekoratif latar belakang (lingkaran cahaya) */
+    /* Elemen dekoratif latar belakang */
     .circle {
         position: absolute;
         border-radius: 50%;
-        opacity: 0.6; /* Opacity dinaikkan sedikit untuk latar terang */
+        opacity: 0.6;
         filter: blur(80px);
         z-index: 0;
     }
-    /* PERUBAHAN: Lingkaran kiri atas (Hijau Sage lembut) */
     .c1 { 
         width: 300px; height: 300px; top: 10%; left: 20%; 
         background: linear-gradient(to right, #d4e0c9, #a3b18a);
     }
-    /* PERUBAHAN: Lingkaran kanan bawah (Krem/Earth tone) */
     .c2 { 
         width: 250px; height: 250px; bottom: 10%; right: 20%; 
         background: linear-gradient(to right, #faedcd, #e9edc9); 
     }
 
-    /* Wadah Login (Efek Glassmorphism Terang) */
+    /* Wadah Login */
     .login-container {
-        /* PERUBAHAN: Efek kaca disesuaikan jadi lebih putih/terang */
         background: rgba(255, 255, 255, 0.65);
         backdrop-filter: blur(15px);
         -webkit-backdrop-filter: blur(15px);
@@ -56,25 +52,20 @@
         padding: 40px;
         width: 400px;
         text-align: center;
-        /* PERUBAHAN: Bayangan diubah ke nuansa hijau gelap transparan */
         box-shadow: 0 15px 35px rgba(88, 129, 87, 0.1);
         z-index: 1;
-        /* PERUBAHAN: Warna teks utama diubah menjadi Hijau Tua/Abu Gelap */
         color: #344e41; 
     }
 
-    /* Wadah Logo */
     .-container {
         margin: 0 auto 20px;
         text-align: center;
     }
     
-    /* Gaya Gambar Logo */
-    .-img {
+    .logo-img {
         width: 80px;
         height: 80px;
         object-fit: contain; 
-        /* PERUBAHAN: Drop shadow disesuaikan untuk latar terang */
         filter: drop-shadow(0 5px 10px rgba(88, 129, 87, 0.2)); 
     }
 
@@ -86,7 +77,6 @@
     
     p.subtitle {
         font-size: 0.9em;
-        /* PERUBAHAN: Warna subtitle menjadi hijau pucat elegan */
         color: #588157; 
         margin-bottom: 30px;
     }
@@ -102,18 +92,15 @@
         display: block;
         margin-bottom: 8px;
         font-size: 0.9em;
-        /* PERUBAHAN: Warna teks label */
         color: #4a5d4e; 
     }
 
     .input-group input {
         width: 100%;
         padding: 12px 15px;
-        /* PERUBAHAN: Latar belakang input sedikit putih */
         background: rgba(255, 255, 255, 0.8);
         border: 1px solid rgba(163, 177, 138, 0.6);
         border-radius: 8px;
-        /* PERUBAHAN: Teks input pengguna */
         color: #2b3a30; 
         font-size: 1em;
         outline: none;
@@ -122,7 +109,6 @@
 
     .input-group input:focus {
         background: #ffffff;
-        /* PERUBAHAN: Efek glowing saat fokus jadi hijau lembut */
         border-color: #588157;
         box-shadow: 0 0 10px rgba(88, 129, 87, 0.2);
     }
@@ -131,7 +117,6 @@
     .btn-login {
         width: 100%;
         padding: 12px;
-        /* PERUBAHAN: Gradasi tombol jadi hijau segar/daun */
         background: linear-gradient(to right, #8a9a5b, #588157);
         border: none;
         border-radius: 8px;
@@ -145,19 +130,15 @@
 
     .btn-login:hover {
         transform: translateY(-2px);
-        /* PERUBAHAN: Bayangan hijau saat di-hover */
         box-shadow: 0 5px 15px rgba(88, 129, 87, 0.3);
     }
 
-    /* Footer kecil */
     .footer {
         margin-top: 20px;
         font-size: 0.8em;
-        /* PERUBAHAN: Warna footer lebih tegas dari latar */
         color: rgba(52, 78, 65, 0.7);
     }
     
-    /* Pesan Error */
     #error-msg {
         color: #d9534f;
         font-size: 0.9em;
@@ -201,25 +182,39 @@
 
     <script>
     // =======================================================
-    // KONFIGURASI PENTING
+    // KONFIGURASI PENTING (URL APPS SCRIPT LOGIN & T2Q)
     // =======================================================
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyZKEYXblP_bpPvojEjemtvw0ozji2pp5wIv6igMSSdqj3ICm11F7BCr6NbqGzzfQxYfw/exec"; 
-    
-    // Otomatis tanamkan URL ke browser saat halaman dibuka
-    localStorage.setItem('gasUrl', SCRIPT_URL);
-    localStorage.setItem('gas_url', SCRIPT_URL);
+    const LOGIN_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyZKEYXblP_bpPvojEjemtvw0ozji2pp5wIv6igMSSdqj3ICm11F7BCr6NbqGzzfQxYfw/exec"; 
+    const T2Q_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzwrfVGzMHmlWUxr9NZl8lp2j_YshyDHHVO9QpEuBvJQKfqa8QQKDfOCgiRZqCPqmWN/exec";
+
+    // Fungsi Pembantu: Mengunci semua variasi key URL & data user di LocalStorage
+    function syncLocalStorage(guruData = null) {
+        const urlKeys = ['gasUrl', 'gas_url', 'scriptUrl', 'script_url', 'webAppUrl', 'appUrl', 'gasApiUrl', 'GAS_URL', 'GAS_API_URL'];
+        urlKeys.forEach(k => localStorage.setItem(k, T2Q_SCRIPT_URL));
+        
+        if (guruData) {
+            localStorage.setItem('namaGuru', guruData.nama || guruData.namaLengkap || "");
+            localStorage.setItem('bio', JSON.stringify(guruData));
+            localStorage.setItem('user', JSON.stringify(guruData));
+            localStorage.setItem('dataGuru', JSON.stringify(guruData));
+            localStorage.setItem('userData', JSON.stringify(guruData));
+        }
+    }
+
+    // Tanamkan URL T2Q sejak awal halaman dibuka
+    syncLocalStorage();
 
     let databaseGuru = []; 
     const btnLogin = document.querySelector('.btn-login');
 
-    // 1. SAAT HALAMAN DIBUKA, AMBIL DATA TERBARU DARI SHEET
+    // 1. SAAT HALAMAN DIBUKA, AMBIL DATA GURU DARI SHEET LOGIN
     window.onload = async function() {
         try {
             btnLogin.innerHTML = "Memuat Data...";
             btnLogin.disabled = true;
             btnLogin.style.opacity = "0.7";
 
-            const response = await fetch(SCRIPT_URL);
+            const response = await fetch(LOGIN_SCRIPT_URL);
             const data = await response.json();
 
             if (data.users) {
@@ -257,15 +252,8 @@
         );
 
         if (guruDitemukan) {
-            // =======================================================
-            // PERBAIKAN UTAMA: SIMPAN SELURUH DATA GURU & URL KE MEMORI BROWSER
-            // =======================================================
-            localStorage.setItem('namaGuru', guruDitemukan.nama);
-            localStorage.setItem('bio', JSON.stringify(guruDitemukan));
-            localStorage.setItem('user', JSON.stringify(guruDitemukan));
-            localStorage.setItem('dataGuru', JSON.stringify(guruDitemukan));
-            localStorage.setItem('gasUrl', SCRIPT_URL);
-            localStorage.setItem('gas_url', SCRIPT_URL);
+            // Simpan seluruh data profil dan kunci semua variasi URL T2Q
+            syncLocalStorage(guruDitemukan);
             
             // Animasi tombol sukses
             btnLogin.innerHTML = "Berhasil Masuk...";
@@ -277,7 +265,6 @@
             }, 1000);
 
         } else {
-            // GAGAL
             errorMsg.style.display = 'block';
             document.querySelector('.login-container').style.animation = "shake 0.5s";
             setTimeout(() => { document.querySelector('.login-container').style.animation = "none"; }, 500);
@@ -286,7 +273,4 @@
 </script>
 
 </body>
-
 </html>
-
-
