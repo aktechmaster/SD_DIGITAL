@@ -1974,60 +1974,93 @@ window.addEventListener('click', function(event) {
 });
 
         // ==========================================
-// --- LOGIKA OTOMATIS MENU T2Q ---
+// --- LOGIKA OTOMATIS MENU T2Q & PROGRES SISWA ---
 // ==========================================
 
 const tombolT2Q = document.getElementById('menu-t2q');
-const GAS_API_URL = "https://script.google.com/macros/s/AKfycbzwrfVGzMHmlWUxr9NZl8lp2j_YshyDHHVO9QpEuBvJQKfqa8QQKDfOCgiRZqCPqmWN/exec"; // Ganti dengan Web App URL dari GAS Anda!
+const GAS_API_URL = "https://script.google.com/macros/s/AKfycbrwvrfVgzMHmlWUxr9NZ181p2j_YshyDHHVO9QpEuBvJQKfqa8QQKDfOCgiRZqCPqmWN/exec"; 
 
+// 1. Fungsi Pembantu: Memeriksa Data Guru secara Aman (Mencegah ReferenceError: bio is not defined)
+function getBioGuru() {
+    if (typeof bio !== 'undefined' && bio) return bio;
+    if (typeof dataGuru !== 'undefined' && dataGuru) return dataGuru;
+    if (typeof userData !== 'undefined' && userData) return userData;
+    try {
+        const localData = localStorage.getItem('user') || localStorage.getItem('bio') || localStorage.getItem('dataGuru');
+        if (localData) return JSON.parse(localData);
+    } catch(e) {}
+    return {};
+}
+
+// 2. Fungsi Pembantu: Mengambil Nama Guru Log In
+function getNamaGuruLogin() {
+    const dataBio = getBioGuru();
+    let nama = dataBio.nama || dataBio.namaLengkap || dataBio.namaGuru || "";
+
+    // Fallback: Jika nama tidak ada di variabel, ambil langsung dari teks header layar ("Selamat Datang, Asti Afnita Sari")
+    if (!nama) {
+        const bodyText = document.body.innerText;
+        const match = bodyText.match(/Selamat Datang,?\s*\n?\s*([^\n\r]+)/i);
+        if (match && match[1]) {
+            nama = match[1].trim();
+        }
+    }
+    return nama;
+}
+
+// 3. Inisialisasi Tampilan Tombol T2Q
 if (tombolT2Q) { 
-    let mapelGuru = (bio.mataPelajaran || "").toUpperCase();
+    const dataBio = getBioGuru();
+    let mapelGuru = String(dataBio.mataPelajaran || dataBio.mapel || "").toUpperCase();
 
-    if (mapelGuru.includes("T2Q") || mapelGuru.includes("TAHSIN") || mapelGuru.includes("TAHFIDZ")) {
+    // Tampilkan menu jika mapel T2Q/Tahsin/Tahfidz, atau jika data mapel belum terbaca
+    if (mapelGuru.includes("T2Q") || mapelGuru.includes("TAHSIN") || mapelGuru.includes("TAHFIDZ") || mapelGuru === "") {
         tombolT2Q.style.display = "flex"; 
     } else {
         tombolT2Q.style.display = "none"; 
     }
 }
 
-// Function Buka Modal & Fetch Data Rekap T2Q Siswa
+// 4. Function Buka Modal & Fetch Data Rekap T2Q Siswa
 async function bukaProgresT2Q(event) {
-    // Stop event bubbling agar tidak membuka link jurnal T2Q
     if (event) event.stopPropagation();
 
     const modal = document.getElementById('modal-progres-t2q');
     const modalBody = document.getElementById('modal-body-t2q');
     
-    modal.style.display = 'flex';
-    modalBody.innerHTML = '<p style="text-align:center; padding: 20px;">⏳ Memuat data progres T2Q siswa...</p>';
+    if (modal) modal.style.display = 'flex';
+    if (modalBody) modalBody.innerHTML = '<p style="text-align:center; padding: 20px;">⏳ Memuat data progres T2Q siswa...</p>';
 
     try {
         const response = await fetch(`${GAS_API_URL}?action=getRekap`);
         const result = await response.json();
 
         if (result.status === "success") {
-            // Ambil nama guru dari bio (misal: bio.nama / bio.namaGuru)
-            const namaGuruLogin = (bio.nama || bio.namaLengkap || "").trim().toLowerCase();
+            // Dapatkan nama guru login secara otomatis
+            const namaGuruLogin = getNamaGuruLogin().toLowerCase().trim();
 
-            // Filter data siswa sesuai Pengampu (Kolom I)
+            // Filter data siswa sesuai Pengampu (Kolom I di Spreadsheet)
             const dataFiltered = result.data.filter(siswa => {
-                const pengampu = (siswa.pengampu || "").toLowerCase();
-                // Melakukan pencocokan string nama pengampu dengan nama guru login
+                const pengampu = (siswa.pengampu || "").toLowerCase().trim();
+                if (!namaGuruLogin || !pengampu) return false;
+                
+                // Mencocokkan nama pengampu dengan nama guru yang sedang login
                 return pengampu.includes(namaGuruLogin) || namaGuruLogin.includes(pengampu);
             });
 
             renderTabelProgresT2Q(dataFiltered);
         } else {
-            modalBody.innerHTML = `<p style="color:red; text-align:center;">Gagal mengambil data: ${result.message}</p>`;
+            if (modalBody) modalBody.innerHTML = `<p style="color:red; text-align:center; padding:20px;">Gagal mengambil data: ${result.message}</p>`;
         }
     } catch (err) {
-        modalBody.innerHTML = `<p style="color:red; text-align:center;">Terjadi kesalahan sistem: ${err.message}</p>`;
+        if (modalBody) modalBody.innerHTML = `<p style="color:red; text-align:center; padding:20px;">Terjadi kesalahan sistem: ${err.message}</p>`;
     }
 }
 
-// Render Tabel Hasil Filter
+// 5. Render Tabel Hasil Filter Siswa
 function renderTabelProgresT2Q(data) {
     const modalBody = document.getElementById('modal-body-t2q');
+    if (!modalBody) return;
 
     if (data.length === 0) {
         modalBody.innerHTML = '<p style="text-align:center; color:#777; padding:20px;">Belum ada data progres siswa yang diampu oleh Anda.</p>';
@@ -2040,7 +2073,7 @@ function renderTabelProgresT2Q(data) {
                 <tr>
                     <th>No</th>
                     <th>Nama Siswa</th>
-                    <th>Kelas / NIPD</th>
+                    <th>NIPD / Kelas</th>
                     <th>JK</th>
                     <th>Tahsin</th>
                     <th>Ket. Tahsin</th>
@@ -2076,9 +2109,10 @@ function renderTabelProgresT2Q(data) {
     modalBody.innerHTML = htmlTable;
 }
 
-// Function Tutup Modal
+// 6. Function Tutup Modal
 function tutupModalProgresT2Q() {
-    document.getElementById('modal-progres-t2q').style.display = 'none';
+    const modal = document.getElementById('modal-progres-t2q');
+    if (modal) modal.style.display = 'none';
 }
         
 </script>
