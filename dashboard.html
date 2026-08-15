@@ -504,10 +504,98 @@
                 <p>Klik untuk input jurnal harian KBM.</p>
             </div>
         
-        <div id="menu-t2q" class="menu-card" onclick="window.open('https://aktechmaster.github.io/Jurnal-T2Q-SD/')">
-                <h3>📖 Jurnal T2Q</h3>
-                <p>Klik untuk input perkembangan Tahsin & Tahfidz.</p>
-            </div>
+        <!-- Kartu Menu T2Q -->
+<div id="menu-t2q" class="menu-card" style="display: flex; flex-direction: column; justify: space-between;">
+    <div onclick="window.open('https://aktechmaster.github.io/Jurnal-T2Q-SD/')" style="cursor: pointer;">
+        <h3>📖 Jurnal T2Q</h3>
+        <p>Klik untuk input perkembangan Tahsin & Tahfidz.</p>
+    </div>
+    
+    <div style="margin-top: 15px; border-top: 1px dashed #ccc; pt-2; padding-top: 10px;">
+        <button id="btn-progres-t2q" class="btn-progres" onclick="bukaProgresT2Q(event)">
+            🔍 Lihat Progres T2Q Siswa
+        </button>
+    </div>
+</div>
+
+<!-- Modal Popup Progres T2Q Siswa -->
+<div id="modal-progres-t2q" class="modal-backdrop" style="display: none;">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 id="modal-title">📊 Rekap Progres T2Q Siswa</h3>
+            <span class="close-btn" onclick="tutupModalProgresT2Q()">&times;</span>
+        </div>
+        <div class="modal-body" id="modal-body-t2q">
+            <p style="text-align: center;">Mengambil data siswa...</p>
+        </div>
+    </div>
+</div>
+
+<!-- CSS Sederhana untuk Modal & Tombol (Letakkan di <style> Anda) -->
+<style>
+.btn-progres {
+    width: 100%;
+    background-color: #2e7d32;
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: bold;
+    transition: background-color 0.2s;
+}
+.btn-progres:hover {
+    background-color: #1b5e20;
+}
+.modal-backdrop {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+}
+.modal-content {
+    background: white;
+    width: 90%;
+    max-width: 950px;
+    max-height: 85vh;
+    border-radius: 10px;
+    padding: 20px;
+    overflow-y: auto;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+}
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 2px solid #eee;
+    padding-bottom: 10px;
+}
+.close-btn {
+    font-size: 24px;
+    cursor: pointer;
+    font-weight: bold;
+    color: #888;
+}
+.t2q-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 15px;
+    font-size: 13px;
+}
+.t2q-table th, .t2q-table td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+}
+.t2q-table th {
+    background-color: #f2f2f2;
+    color: #333;
+}
+</style>
 
          <div class="menu-card" onclick="bukaJadwalMengajar()">
             <div class="icon-container" style="background: #e1f5fe; color: #0288d1;">
@@ -1884,6 +1972,115 @@ window.addEventListener('click', function(event) {
         }
     });
 });
+
+        // ==========================================
+// --- LOGIKA OTOMATIS MENU T2Q ---
+// ==========================================
+
+const tombolT2Q = document.getElementById('menu-t2q');
+const GAS_API_URL = "https://script.google.com/macros/s/AKfycbzwrfVGzMHmlWUxr9NZl8lp2j_YshyDHHVO9QpEuBvJQKfqa8QQKDfOCgiRZqCPqmWN/exec"; // Ganti dengan Web App URL dari GAS Anda!
+
+if (tombolT2Q) { 
+    let mapelGuru = (bio.mataPelajaran || "").toUpperCase();
+
+    if (mapelGuru.includes("T2Q") || mapelGuru.includes("TAHSIN") || mapelGuru.includes("TAHFIDZ")) {
+        tombolT2Q.style.display = "flex"; 
+    } else {
+        tombolT2Q.style.display = "none"; 
+    }
+}
+
+// Function Buka Modal & Fetch Data Rekap T2Q Siswa
+async function bukaProgresT2Q(event) {
+    // Stop event bubbling agar tidak membuka link jurnal T2Q
+    if (event) event.stopPropagation();
+
+    const modal = document.getElementById('modal-progres-t2q');
+    const modalBody = document.getElementById('modal-body-t2q');
+    
+    modal.style.display = 'flex';
+    modalBody.innerHTML = '<p style="text-align:center; padding: 20px;">⏳ Memuat data progres T2Q siswa...</p>';
+
+    try {
+        const response = await fetch(`${GAS_API_URL}?action=getRekap`);
+        const result = await response.json();
+
+        if (result.status === "success") {
+            // Ambil nama guru dari bio (misal: bio.nama / bio.namaGuru)
+            const namaGuruLogin = (bio.nama || bio.namaLengkap || "").trim().toLowerCase();
+
+            // Filter data siswa sesuai Pengampu (Kolom I)
+            const dataFiltered = result.data.filter(siswa => {
+                const pengampu = (siswa.pengampu || "").toLowerCase();
+                // Melakukan pencocokan string nama pengampu dengan nama guru login
+                return pengampu.includes(namaGuruLogin) || namaGuruLogin.includes(pengampu);
+            });
+
+            renderTabelProgresT2Q(dataFiltered);
+        } else {
+            modalBody.innerHTML = `<p style="color:red; text-align:center;">Gagal mengambil data: ${result.message}</p>`;
+        }
+    } catch (err) {
+        modalBody.innerHTML = `<p style="color:red; text-align:center;">Terjadi kesalahan sistem: ${err.message}</p>`;
+    }
+}
+
+// Render Tabel Hasil Filter
+function renderTabelProgresT2Q(data) {
+    const modalBody = document.getElementById('modal-body-t2q');
+
+    if (data.length === 0) {
+        modalBody.innerHTML = '<p style="text-align:center; color:#777; padding:20px;">Belum ada data progres siswa yang diampu oleh Anda.</p>';
+        return;
+    }
+
+    let htmlTable = `
+        <table class="t2q-table">
+            <thead>
+                <tr>
+                    <th>No</th>
+                    <th>Nama Siswa</th>
+                    <th>Kelas / NIPD</th>
+                    <th>JK</th>
+                    <th>Tahsin</th>
+                    <th>Ket. Tahsin</th>
+                    <th>Tahfidz</th>
+                    <th>Ket. Tahfidz</th>
+                    <th>Pengampu</th>
+                </tr>
+            </thead>
+            <tbody>
+    `;
+
+    data.forEach((row, index) => {
+        htmlTable += `
+            <tr>
+                <td>${index + 1}</td>
+                <td><b>${row.nama}</b></td>
+                <td>${row.nipdKelas}</td>
+                <td>${row.jk}</td>
+                <td>${row.tahsin || '-'}</td>
+                <td>${row.ketTahsin || '-'}</td>
+                <td>${row.tahfidz || '-'}</td>
+                <td>${row.ketTahfidz || '-'}</td>
+                <td>${row.pengampu}</td>
+            </tr>
+        `;
+    });
+
+    htmlTable += `
+            </tbody>
+        </table>
+    `;
+
+    modalBody.innerHTML = htmlTable;
+}
+
+// Function Tutup Modal
+function tutupModalProgresT2Q() {
+    document.getElementById('modal-progres-t2q').style.display = 'none';
+}
+        
 </script>
 
 </body>
