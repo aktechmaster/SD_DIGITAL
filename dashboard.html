@@ -1977,10 +1977,37 @@ window.addEventListener('click', function(event) {
 // --- LOGIKA OTOMATIS MENU T2Q & PROGRES SISWA ---
 // ==========================================
 
-const tombolT2Q = document.getElementById('menu-t2q');
-const GAS_API_URL = "https://script.google.com/macros/s/AKfycbzwrfVGzMHmlWUxr9NZl8lp2j_YshyDHHVO9QpEuBvJQKfqa8QQKDfOCgiRZqCPqmWN/exec"; 
+const GAS_API_URL = "https://script.google.com/macros/s/AKfycbzwrfVGzMHmlWUxr9NZl8lp2j_YshyDHHVO9QpEuBvJQKfqa8QQKDfOCgiRZqCPqmWN/exec";
 
-// 1. Fungsi Pembantu: Memeriksa Data Guru secara Aman (Mencegah ReferenceError: bio is not defined)
+// OTOMATISASI: Kunci URL ke memori browser agar Pop-up Konfigurasi TIDAK PERNAH muncul
+try {
+    localStorage.setItem('gas_url', GAS_API_URL);
+    localStorage.setItem('gasUrl', GAS_API_URL);
+    localStorage.setItem('scriptUrl', GAS_API_URL);
+    localStorage.setItem('appUrl', GAS_API_URL);
+} catch (e) {
+    console.warn("Gagal menyimpan URL ke localStorage:", e);
+}
+
+let rawMasterData = [];
+
+// Inisialisasi Otomatis saat Halaman Selesai Dimuat
+document.addEventListener("DOMContentLoaded", () => {
+    // 1. Sembunyikan dan paksa tutup Modal Konfigurasi URL jika elemennya ada di HTML
+    const modalKonfigList = document.querySelectorAll('#modal-konfigurasi, #modalKonfigurasi, .modal-konfigurasi, [id*="config"]');
+    modalKonfigList.forEach(modal => {
+        modal.style.display = 'none';
+        modal.classList.add('hidden');
+    });
+
+    // 2. Setup Tombol & Filter Menu T2Q
+    initMenuT2Q();
+
+    // 3. Langsung Ambil Data Master (Kelas & Pengampu) dari Sheets tanpa Minta URL
+    fetchInitialData();
+});
+
+// 1. Fungsi Pembantu: Memeriksa Data Guru secara Aman
 function getBioGuru() {
     if (typeof bio !== 'undefined' && bio) return bio;
     if (typeof dataGuru !== 'undefined' && dataGuru) return dataGuru;
@@ -1997,7 +2024,6 @@ function getNamaGuruLogin() {
     const dataBio = getBioGuru();
     let nama = dataBio.nama || dataBio.namaLengkap || dataBio.namaGuru || "";
 
-    // Fallback: Jika nama tidak ada di variabel, ambil langsung dari teks header layar ("Selamat Datang, Asti Afnita Sari")
     if (!nama) {
         const bodyText = document.body.innerText;
         const match = bodyText.match(/Selamat Datang,?\s*\n?\s*([^\n\r]+)/i);
@@ -2009,19 +2035,54 @@ function getNamaGuruLogin() {
 }
 
 // 3. Inisialisasi Tampilan Tombol T2Q
-if (tombolT2Q) { 
-    const dataBio = getBioGuru();
-    let mapelGuru = String(dataBio.mataPelajaran || dataBio.mapel || "").toUpperCase();
+function initMenuT2Q() {
+    const tombolT2Q = document.getElementById('menu-t2q');
+    if (tombolT2Q) { 
+        const dataBio = getBioGuru();
+        let mapelGuru = String(dataBio.mataPelajaran || dataBio.mapel || "").toUpperCase();
 
-    // Tampilkan menu jika mapel T2Q/Tahsin/Tahfidz, atau jika data mapel belum terbaca
-    if (mapelGuru.includes("T2Q") || mapelGuru.includes("TAHSIN") || mapelGuru.includes("TAHFIDZ") || mapelGuru === "") {
-        tombolT2Q.style.display = "flex"; 
-    } else {
-        tombolT2Q.style.display = "none"; 
+        if (mapelGuru.includes("T2Q") || mapelGuru.includes("TAHSIN") || mapelGuru.includes("TAHFIDZ") || mapelGuru === "") {
+            tombolT2Q.style.display = "flex"; 
+        } else {
+            tombolT2Q.style.display = "none"; 
+        }
     }
 }
 
-// 4. Function Buka Modal & Fetch Data Rekap T2Q Siswa
+// 4. Ambil Data Master untuk Populasi Dropdown Kelas & Pengampu Utama
+async function fetchInitialData() {
+    const statusEl = document.getElementById("status-text") || document.getElementById("status");
+    if (statusEl) statusEl.textContent = "Memuat data kelas...";
+
+    try {
+        const response = await fetch(`${GAS_API_URL}?action=getInitialData`);
+        const result = await response.json();
+
+        if (result.status === "success") {
+            rawMasterData = result.data;
+            populateKelasDropdown();
+            if (statusEl) statusEl.textContent = "Ready";
+        } else {
+            console.error("Gagal memuat data master:", result.message);
+        }
+    } catch (err) {
+        console.error("Kesalahan koneksi saat memuat data master:", err);
+    }
+}
+
+// Fill Dropdown Kelas secara Otomatis
+function populateKelasDropdown() {
+    const kelasSelect = document.getElementById("kelas");
+    if (!kelasSelect || !rawMasterData.length) return;
+
+    const uniqueKelas = [...new Set(rawMasterData.map(item => item.kelas))];
+    kelasSelect.innerHTML = '<option value="">-- Pilih Kelas --</option>';
+    uniqueKelas.forEach(k => {
+        kelasSelect.innerHTML += `<option value="${k}">${k}</option>`;
+    });
+}
+
+// 5. Function Buka Modal & Fetch Data Rekap T2Q Siswa
 async function bukaProgresT2Q(event) {
     if (event) event.stopPropagation();
 
@@ -2036,15 +2097,12 @@ async function bukaProgresT2Q(event) {
         const result = await response.json();
 
         if (result.status === "success") {
-            // Dapatkan nama guru login secara otomatis
             const namaGuruLogin = getNamaGuruLogin().toLowerCase().trim();
 
-            // Filter data siswa sesuai Pengampu (Kolom I di Spreadsheet)
             const dataFiltered = result.data.filter(siswa => {
                 const pengampu = (siswa.pengampu || "").toLowerCase().trim();
                 if (!namaGuruLogin || !pengampu) return false;
                 
-                // Mencocokkan nama pengampu dengan nama guru yang sedang login
                 return pengampu.includes(namaGuruLogin) || namaGuruLogin.includes(pengampu);
             });
 
@@ -2057,7 +2115,7 @@ async function bukaProgresT2Q(event) {
     }
 }
 
-// 5. Render Tabel Hasil Filter Siswa
+// 6. Render Tabel Hasil Filter Siswa
 function renderTabelProgresT2Q(data) {
     const modalBody = document.getElementById('modal-body-t2q');
     if (!modalBody) return;
@@ -2109,7 +2167,7 @@ function renderTabelProgresT2Q(data) {
     modalBody.innerHTML = htmlTable;
 }
 
-// 6. Function Tutup Modal
+// 7. Function Tutup Modal
 function tutupModalProgresT2Q() {
     const modal = document.getElementById('modal-progres-t2q');
     if (modal) modal.style.display = 'none';
