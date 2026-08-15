@@ -200,89 +200,90 @@
     </div>
 
     <script>
-        // =======================================================
-        // KONFIGURASI PENTING
-        // =======================================================
-        // Tempel URL Web App Script Anda di sini (yang berakhiran /exec)
-        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyZKEYXblP_bpPvojEjemtvw0ozji2pp5wIv6igMSSdqj3ICm11F7BCr6NbqGzzfQxYfw/exec"; 
+    // =======================================================
+    // KONFIGURASI PENTING
+    // =======================================================
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyZKEYXblP_bpPvojEjemtvw0ozji2pp5wIv6igMSSdqj3ICm11F7BCr6NbqGzzfQxYfw/exec"; 
+    
+    // Otomatis tanamkan URL ke browser saat halaman dibuka
+    localStorage.setItem('gasUrl', SCRIPT_URL);
+    localStorage.setItem('gas_url', SCRIPT_URL);
+
+    let databaseGuru = []; 
+    const btnLogin = document.querySelector('.btn-login');
+
+    // 1. SAAT HALAMAN DIBUKA, AMBIL DATA TERBARU DARI SHEET
+    window.onload = async function() {
+        try {
+            btnLogin.innerHTML = "Memuat Data...";
+            btnLogin.disabled = true;
+            btnLogin.style.opacity = "0.7";
+
+            const response = await fetch(SCRIPT_URL);
+            const data = await response.json();
+
+            if (data.users) {
+                databaseGuru = data.users;
+                console.log("Data Guru Berhasil Dimuat:", databaseGuru.length, "orang");
+                
+                btnLogin.innerHTML = "MASUK PORTAL";
+                btnLogin.disabled = false;
+                btnLogin.style.opacity = "1";
+            }
+
+        } catch (error) {
+            console.error("Gagal ambil data:", error);
+            btnLogin.innerHTML = "Gagal Koneksi Server";
+            alert("Gagal mengambil data database! Pastikan internet lancar atau URL Script benar.");
+        }
+    };
+
+    // 2. LOGIKA LOGIN
+    document.getElementById('loginForm').addEventListener('submit', function(e) {
+        e.preventDefault(); 
         
-        // Variabel untuk menampung data dari Sheet
-        let databaseGuru = []; 
-        const btnLogin = document.querySelector('.btn-login');
+        const inputUser = document.getElementById('username').value.trim();
+        const inputPass = document.getElementById('password').value;
+        const errorMsg = document.getElementById('error-msg');
 
-        // 1. SAAT HALAMAN DIBUKA, AMBIL DATA TERBARU DARI SHEET
-        window.onload = async function() {
-            try {
-                // Matikan tombol login dulu biar user gak buru-buru
-                btnLogin.innerHTML = "Memuat Data...";
-                btnLogin.disabled = true;
-                btnLogin.style.opacity = "0.7";
+        if (databaseGuru.length === 0) {
+            alert("Data guru belum selesai dimuat. Tunggu sebentar...");
+            return;
+        }
 
-                // Minta data ke Code.gs
-                const response = await fetch(SCRIPT_URL);
-                const data = await response.json();
+        const guruDitemukan = databaseGuru.find(g => 
+            g.username.toLowerCase() === inputUser.toLowerCase() && 
+            String(g.password) === String(inputPass)
+        );
 
-                // Simpan data 'users' dari Code.gs ke variabel lokal
-                // Code.gs mengirim format: { username: "...", password: "...", nama: "..." }
-                if (data.users) {
-                    databaseGuru = data.users;
-                    console.log("Data Guru Berhasil Dimuat:", databaseGuru.length, "orang");
-                    
-                    // Nyalakan tombol login
-                    btnLogin.innerHTML = "MASUK PORTAL";
-                    btnLogin.disabled = false;
-                    btnLogin.style.opacity = "1";
-                }
-
-            } catch (error) {
-                console.error("Gagal ambil data:", error);
-                btnLogin.innerHTML = "Gagal Koneksi Server";
-                alert("Gagal mengambil data database! Pastikan internet lancar atau URL Script benar.");
-            }
-        };
-
-        // 2. LOGIKA LOGIN (Sama seperti sebelumnya, tapi pakai data dinamis)
-        document.getElementById('loginForm').addEventListener('submit', function(e) {
-            e.preventDefault(); 
+        if (guruDitemukan) {
+            // =======================================================
+            // PERBAIKAN UTAMA: SIMPAN SELURUH DATA GURU & URL KE MEMORI BROWSER
+            // =======================================================
+            localStorage.setItem('namaGuru', guruDitemukan.nama);
+            localStorage.setItem('bio', JSON.stringify(guruDitemukan));
+            localStorage.setItem('user', JSON.stringify(guruDitemukan));
+            localStorage.setItem('dataGuru', JSON.stringify(guruDitemukan));
+            localStorage.setItem('gasUrl', SCRIPT_URL);
+            localStorage.setItem('gas_url', SCRIPT_URL);
             
-            const inputUser = document.getElementById('username').value.trim(); // Hapus spasi gak sengaja
-            const inputPass = document.getElementById('password').value;
-            const errorMsg = document.getElementById('error-msg');
+            // Animasi tombol sukses
+            btnLogin.innerHTML = "Berhasil Masuk...";
+            btnLogin.style.background = "linear-gradient(to right, #11998e, #38ef7d)";
+            
+            // Redirect setelah 1 detik
+            setTimeout(() => {
+                window.location.href = 'dashboard.html';
+            }, 1000);
 
-            // Cek apakah data sudah terdownload
-            if (databaseGuru.length === 0) {
-                alert("Data guru belum selesai dimuat. Tunggu sebentar...");
-                return;
-            }
-
-            // PENTING: Sesuaikan nama key dengan yang dikirim Code.gs 
-            // (Code.gs mengirim: username & password, bukan user & pass)
-            const guruDitemukan = databaseGuru.find(g => 
-                g.username.toLowerCase() === inputUser.toLowerCase() && // Username tidak case-sensitive
-                String(g.password) === String(inputPass) // Password harus sama persis (case-sensitive)
-            );
-
-            if (guruDitemukan) {
-                // SUKSES
-                localStorage.setItem('namaGuru', guruDitemukan.nama);
-                
-                // Animasi tombol sukses
-                btnLogin.innerHTML = "Berhasil Masuk...";
-                btnLogin.style.background = "linear-gradient(to right, #11998e, #38ef7d)";
-                
-                // Redirect setelah 1 detik
-                setTimeout(() => {
-                    window.location.href = 'dashboard.html';
-                }, 1000);
-
-            } else {
-                // GAGAL
-                errorMsg.style.display = 'block';
-                document.querySelector('.login-container').style.animation = "shake 0.5s";
-                setTimeout(() => { document.querySelector('.login-container').style.animation = "none"; }, 500);
-            }
-        });
-    </script>
+        } else {
+            // GAGAL
+            errorMsg.style.display = 'block';
+            document.querySelector('.login-container').style.animation = "shake 0.5s";
+            setTimeout(() => { document.querySelector('.login-container').style.animation = "none"; }, 500);
+        }
+    });
+</script>
 
 </body>
 
