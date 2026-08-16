@@ -1696,11 +1696,29 @@ window.bukaBiodata = function() {
     const modal = document.getElementById("modalBiodata");
     if (modal) modal.style.display = "block";
 
-    const namaTarget = typeof namaGuru !== "undefined" ? namaGuru : "";
-    const bio = dataDariSpreadsheet.biodata ? dataDariSpreadsheet.biodata[namaTarget] : null;
+    const namaTarget = (typeof namaGuru !== "undefined" && namaGuru) ? namaGuru : getNamaGuruLogin();
+    
+    // Pencarian bio yang fleksibel (pencocokan nama)
+    let bio = null;
+    if (dataDariSpreadsheet.biodata) {
+        if (dataDariSpreadsheet.biodata[namaTarget]) {
+            bio = dataDariSpreadsheet.biodata[namaTarget];
+        } else {
+            const bersihkan = str => String(str).toLowerCase().replace(/[^a-z0-9]/g, '');
+            const targetBersih = bersihkan(namaTarget);
+            if (targetBersih) {
+                for (let k in dataDariSpreadsheet.biodata) {
+                    if (bersihkan(k) === targetBersih || bersihkan(k).includes(targetBersih)) {
+                        bio = dataDariSpreadsheet.biodata[k];
+                        break;
+                    }
+                }
+            }
+        }
+    }
     
     const elNama = document.getElementById("bio-nama");
-    if (elNama) elNama.innerText = namaTarget; 
+    if (elNama) elNama.innerText = namaTarget || "-"; 
 
     if (bio) {
         const formatTanggal = (strTgl) => {
@@ -1719,8 +1737,8 @@ window.bukaBiodata = function() {
         if (document.getElementById("bio-tmt")) document.getElementById("bio-tmt").innerText = bio.tmt || "-";
         if (document.getElementById("bio-sertifikasi")) document.getElementById("bio-sertifikasi").innerText = bio.sertifikasi || "-";
         
-        let ttl = (bio.tempatLahir || "") + ", " + formatTanggal(bio.tglLahir);
-        if (document.getElementById("bio-ttl")) document.getElementById("bio-ttl").innerText = ttl;
+        let ttl = (bio.tempatLahir || "") + (bio.tempatLahir && bio.tglLahir ? ", " : "") + formatTanggal(bio.tglLahir);
+        if (document.getElementById("bio-ttl")) document.getElementById("bio-ttl").innerText = ttl || "-";
         
         if (document.getElementById("bio-jk")) document.getElementById("bio-jk").innerText = bio.jk || "-";
         if (document.getElementById("bio-agama")) document.getElementById("bio-agama").innerText = bio.agama || "-";
@@ -1776,8 +1794,25 @@ window.bukaJadwalMengajar = function() {
     if (judulHari) judulHari.innerText = namaHari + ", " + tgl.toLocaleDateString('id-ID');
     if (listContainer) listContainer.innerHTML = ""; 
 
-    const namaTarget = typeof namaGuru !== "undefined" ? namaGuru : "";
-    const dataJadwalGuru = dataDariSpreadsheet.jadwalMengajar && dataDariSpreadsheet.jadwalMengajar[namaTarget];
+    const namaTarget = (typeof namaGuru !== "undefined" && namaGuru) ? namaGuru : getNamaGuruLogin();
+    let dataJadwalGuru = null;
+
+    if (dataDariSpreadsheet.jadwalMengajar) {
+        if (dataDariSpreadsheet.jadwalMengajar[namaTarget]) {
+            dataJadwalGuru = dataDariSpreadsheet.jadwalMengajar[namaTarget];
+        } else {
+            const bersihkan = str => String(str).toLowerCase().replace(/[^a-z0-9]/g, '');
+            const targetBersih = bersihkan(namaTarget);
+            if (targetBersih) {
+                for (let k in dataDariSpreadsheet.jadwalMengajar) {
+                    if (bersihkan(k) === targetBersih || bersihkan(k).includes(targetBersih)) {
+                        dataJadwalGuru = dataDariSpreadsheet.jadwalMengajar[k];
+                        break;
+                    }
+                }
+            }
+        }
+    }
 
     if (dataJadwalGuru && dataJadwalGuru[namaHari] && dataJadwalGuru[namaHari].length > 0) {
         if (divKosong) divKosong.style.display = "none";
@@ -1832,12 +1867,17 @@ window.prosesUbahPassword = function() {
     const elPassBaru = document.getElementById("input-pass-baru");
     const elPassKonfirmasi = document.getElementById("input-pass-konfirmasi");
     const elMsgError = document.getElementById("msg-beda-pass");
-    const namaGuruLogin = localStorage.getItem('namaGuru'); 
+    const namaGuruLogin = localStorage.getItem('namaGuru') || getNamaGuruLogin() || (typeof namaGuru !== "undefined" ? namaGuru : "");
 
     const notif = (judul, pesan, ikon) => {
         if (typeof showPopup === "function") showPopup(judul, pesan, ikon);
         else alert(`${judul}: ${pesan}`);
     };
+
+    if (!namaGuruLogin) {
+        notif("Gagal", "Nama pengguna tidak terdeteksi. Silakan login ulang.", "❌");
+        return;
+    }
 
     if (!elPassBaru || !elPassBaru.value || elPassBaru.value.trim() === "") {
         notif("Gagal", "Password baru tidak boleh kosong!", "❌");
@@ -1863,8 +1903,7 @@ window.prosesUbahPassword = function() {
     formData.append('nama', namaGuruLogin);
     formData.append('password', elPassBaru.value);
 
-    // Proteksi fallback endpoint API
-    const targetUrl = typeof API_ !== 'undefined' ? API_ : GAS_API_URL;
+    const targetUrl = typeof API_ !== 'undefined' ? API_ : (typeof GAS_API_URL !== 'undefined' ? GAS_API_URL : '');
 
     fetch(targetUrl, { method: 'POST', body: formData })
     .then(response => response.json())
@@ -1908,7 +1947,7 @@ window.bukaPopupAbsensi = function() {
     var tbody = document.getElementById('isiTabelAbsensi');
     if(tbody) tbody.innerHTML = '<tr><td colspan="6" style="padding:20px; text-align:center;">Sedang mengambil data... <br>⏳ Mohon tunggu...</td></tr>';
 
-    var urlTujuan = "https://script.google.com/macros/s/AKfycbwqC7MvEayos9s8IdYbcoXF488iQ09-LneUD0DvawKUf6AYIUWPOaI0NvMfNEMQP6JVBA/exec";
+    var urlTujuan = typeof GAS_API_URL !== "undefined" ? GAS_API_URL : "https://script.google.com/macros/s/AKfycbwqC7MvEayos9s8IdYbcoXF488iQ09-LneUD0DvawKUf6AYIUWPOaI0NvMfNEMQP6JVBA/exec";
     var fullUrl = urlTujuan + "?action=getRekapDetail&kelas=" + encodeURIComponent(kelas);
     
     fetch(fullUrl)
@@ -1963,14 +2002,14 @@ window.bukaRincianJurnal = function() {
         return;
     }
 
-    const namaTarget = typeof namaGuru !== "undefined" ? namaGuru : "";
+    const namaTarget = (typeof namaGuru !== "undefined" && namaGuru) ? namaGuru : getNamaGuruLogin();
     const bersihkanNama = (str) => String(str).toLowerCase().replace(/[^a-z0-9]/g, '');
     const namaTargetBersih = bersihkanNama(namaTarget);
 
     let dataRincian = null;
     if (sumberData[namaTarget]) {
         dataRincian = sumberData[namaTarget];
-    } else {
+    } else if (namaTargetBersih) {
         for (let keyNama in sumberData) {
             const keyBersih = bersihkanNama(keyNama);
             if (keyBersih.includes(namaTargetBersih) || namaTargetBersih.includes(keyBersih)) {
