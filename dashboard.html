@@ -821,6 +821,23 @@
                 <div class="item-footer">Data dari sheet "Jurnal fix"</div>
             </div>
 
+            <!-- CARD PROGRES JURNAL T2Q (BARU) -->
+<div class="card-item">
+    <div class="item-header">
+        <span class="item-title">Progres Jurnal T2Q Bulan ini</span>
+        <span class="item-value" id="val-jurnal-t2q">0%</span>
+    </div>
+    <div class="bar-track">
+        <div class="bar-fill" id="bar-jurnal-t2q" style="width: 0%; background-color: #8e44ad;"></div>
+    </div>
+    <div class="item-header" style="margin-bottom:0; margin-top:5px;">
+        <a href="#" onclick="bukaRincianJurnalT2Q(); return false;" style="font-size: 0.85em; font-weight: bold; color: #8e44ad; text-decoration: none;">
+            Lihat Rincian &raquo;
+        </a>
+        <span class="item-footer">Data dari sheet "Jurnal fix T2Q"</span>
+    </div>
+</div>
+
             <div class="card-item" id="card-status-input" style="display:none; border-left: 4px solid #1abc9c;">
                 <div class="item-header">
                     <span class="item-title">Status Input Jurnal Kelas</span>
@@ -1530,7 +1547,7 @@ if (elValBulananT2Q) {
 
 
 // ==========================================
-// 2. FUNGSI BUKA & TUTUP MODAL T2Q
+// FUNGSI BUKA & TUTUP MODAL T2Q
 // ==========================================
 function bukaRincianJurnalT2Q() {
     const modal = document.getElementById('modalRincianJurnalT2Q');
@@ -1539,12 +1556,18 @@ function bukaRincianJurnalT2Q() {
 
     if (!modal || !tbody) return;
 
-    // Ambil nama guru dari variabel namaGuru atau localStorage
-    const namaUser = (typeof namaGuru !== 'undefined' ? namaGuru : localStorage.getItem('namaGuru')) || '';
+    // Ambil nama guru dari variabel aktif / localStorage
+    const namaUser = (typeof namaGuru !== 'undefined' && namaGuru) 
+        ? namaGuru 
+        : (typeof namaUserAktif !== 'undefined' ? namaUserAktif : localStorage.getItem('namaGuru') || '');
+    
     if (elNama) elNama.innerText = namaUser;
 
-    // Menghubungkan ke objek data dari spreadsheet yang aktif
-    const sumberData = (typeof dataDariSpreadsheet !== 'undefined' && dataDariSpreadsheet) ? dataDariSpreadsheet : (typeof globalData !== 'undefined' ? globalData : {});
+    // Ambil data dari objek JSON Apps Script
+    const sumberData = (typeof dataDariSpreadsheet !== 'undefined' && dataDariSpreadsheet) 
+        ? dataDariSpreadsheet 
+        : (typeof globalData !== 'undefined' ? globalData : {});
+    
     const mapT2Q = sumberData.rincianJurnalT2Q || {};
     const dataT2Q = mapT2Q[namaUser] || null;
 
@@ -1553,8 +1576,6 @@ function bukaRincianJurnalT2Q() {
     if (dataT2Q && dataT2Q.length > 0) {
         dataT2Q.forEach(function(item) {
             const tr = document.createElement('tr');
-            
-            // Format warna persen (Hijau jika >= 100%, Merah jika < 100%)
             let valPersen = parseFloat(String(item.persen).replace(',', '.').replace('%', '')) || 0;
             let colorPersen = valPersen >= 100 ? '#27ae60' : '#e74c3c';
 
@@ -1577,7 +1598,6 @@ function tutupRincianJurnalT2Q() {
     const modal = document.getElementById('modalRincianJurnalT2Q');
     if (modal) modal.style.display = 'none';
 }
-
 
 // ==========================================
 // 3. BAGIAN PIKET
