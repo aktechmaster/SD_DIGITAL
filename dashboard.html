@@ -1505,9 +1505,14 @@ async function bukaLaporan() {
         }
     }
 
-    // --- SUNTIK TOMBOL "LIHAT RINCIAN" RINCIAN T2Q ---
+    // ==========================================
+// 1. DEFINISI ELEMEN & SUNTIK TOMBOL T2Q
+// ==========================================
+// Menyiapkan variabel elValBulananT2Q agar tidak 'not defined'
+const elValBulananT2Q = document.getElementById('val-jurnal-t2q') || document.querySelector('.card-item-t2q'); 
+
 if (elValBulananT2Q) {
-    const cardJurnalT2Q = elValBulananT2Q.closest('.card-item');
+    const cardJurnalT2Q = elValBulananT2Q.closest('.card-item') || elValBulananT2Q;
     if (cardJurnalT2Q && !cardJurnalT2Q.querySelector('.btn-rincian-jurnal-t2q')) {
         const linkRincian = document.createElement('a');
         linkRincian.className = 'btn-rincian-jurnal-t2q';
@@ -1523,7 +1528,10 @@ if (elValBulananT2Q) {
     }
 }
 
-// --- FUNGSI BUKA & TUTUP MODAL T2Q ---
+
+// ==========================================
+// 2. FUNGSI BUKA & TUTUP MODAL T2Q
+// ==========================================
 function bukaRincianJurnalT2Q() {
     const modal = document.getElementById('modalRincianJurnalT2Q');
     const tbody = document.getElementById('tabel-body-jurnal-t2q');
@@ -1531,11 +1539,15 @@ function bukaRincianJurnalT2Q() {
 
     if (!modal || !tbody) return;
 
-    // Ambil nama guru aktif
-    const namaUser = formatString(namaUserAktif); 
+    // Ambil nama guru dari variabel namaGuru atau localStorage
+    const namaUser = (typeof namaGuru !== 'undefined' ? namaGuru : localStorage.getItem('namaGuru')) || '';
     if (elNama) elNama.innerText = namaUser;
 
-    const dataT2Q = globalData.rincianJurnalT2Q ? globalData.rincianJurnalT2Q[namaUser] : null;
+    // Menghubungkan ke objek data dari spreadsheet yang aktif
+    const sumberData = (typeof dataDariSpreadsheet !== 'undefined' && dataDariSpreadsheet) ? dataDariSpreadsheet : (typeof globalData !== 'undefined' ? globalData : {});
+    const mapT2Q = sumberData.rincianJurnalT2Q || {};
+    const dataT2Q = mapT2Q[namaUser] || null;
+
     tbody.innerHTML = '';
 
     if (dataT2Q && dataT2Q.length > 0) {
@@ -1543,7 +1555,7 @@ function bukaRincianJurnalT2Q() {
             const tr = document.createElement('tr');
             
             // Format warna persen (Hijau jika >= 100%, Merah jika < 100%)
-            let valPersen = parseFloat(item.persen.replace(',', '.').replace('%', '')) || 0;
+            let valPersen = parseFloat(String(item.persen).replace(',', '.').replace('%', '')) || 0;
             let colorPersen = valPersen >= 100 ? '#27ae60' : '#e74c3c';
 
             tr.innerHTML = `
@@ -1566,20 +1578,25 @@ function tutupRincianJurnalT2Q() {
     if (modal) modal.style.display = 'none';
 }
 
-    // --- BAGIAN 3: PIKET ---
-    const dataPiket = dataDariSpreadsheet.piket?.[namaGuru];
-    const elPiketHadir = document.getElementById("val-piket-hadir");
-    const elPiketGanti = document.getElementById("val-piket-ganti");
 
-    if (elPiketHadir && elPiketGanti) {
-        if (dataPiket) {
-            elPiketHadir.innerText = (dataPiket.hadir || 0) + " Kali";
-            elPiketGanti.innerText = (dataPiket.digantikan || 0) + " Kali";
-        } else {
-            elPiketHadir.innerText = "0 Kali";
-            elPiketGanti.innerText = "0 Kali";
-        }
+// ==========================================
+// 3. BAGIAN PIKET
+// ==========================================
+const namaUserPiket = (typeof namaGuru !== 'undefined' ? namaGuru : localStorage.getItem('namaGuru')) || '';
+const dataPiket = (typeof dataDariSpreadsheet !== 'undefined' && dataDariSpreadsheet.piket) ? dataDariSpreadsheet.piket[namaUserPiket] : null;
+
+const elPiketHadir = document.getElementById("val-piket-hadir");
+const elPiketGanti = document.getElementById("val-piket-ganti");
+
+if (elPiketHadir && elPiketGanti) {
+    if (dataPiket) {
+        elPiketHadir.innerText = (dataPiket.hadir || 0) + " Kali";
+        elPiketGanti.innerText = (dataPiket.digantikan || 0) + " Kali";
+    } else {
+        elPiketHadir.innerText = "0 Kali";
+        elPiketGanti.innerText = "0 Kali";
     }
+}
 
     // --- BAGIAN 4: ABSENSI ---
     const dataAbsen = dataDariSpreadsheet.absensi?.[namaGuru];
