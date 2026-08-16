@@ -821,6 +821,23 @@
                 <div class="item-footer">Data dari sheet "Jurnal fix"</div>
             </div>
 
+            <!-- CARD PROGRES JURNAL T2Q BULAN INI -->
+<div class="card-item">
+    <div class="item-header">
+        <span class="item-title">Progres Jurnal T2Q Bulan ini</span>
+        <span class="item-value" id="val-jurnal-t2q">0%</span>
+    </div>
+    <div class="bar-track">
+        <div class="bar-fill" id="bar-jurnal-t2q" style="width: 0%; background-color: #8e44ad;"></div>
+    </div>
+    <div class="item-footer">Data dari sheet "Jurnal fix T2Q"</div>
+    <div>
+        <a href="#" onclick="bukaRincianJurnalT2Q(); return false;" style="color: #8e44ad; text-decoration: none; font-size: 0.9em; display: inline-block; margin-top: 10px; font-weight: bold; cursor: pointer;">
+            Lihat Rincian &raquo;
+        </a>
+    </div>
+</div>
+
             <div class="card-item" id="card-status-input" style="display:none; border-left: 4px solid #1abc9c;">
                 <div class="item-header">
                     <span class="item-title">Status Input Jurnal Kelas</span>
@@ -1504,6 +1521,24 @@ async function bukaLaporan() {
             cardJurnal.appendChild(linkRincian);
         }
     }
+
+    // --- BAGIAN 2B: JURNAL BULANAN T2Q ---
+const dataBulananT2Q = dataDariSpreadsheet.jurnalBulananT2Q?.[namaGuru];
+const elValT2Q = document.getElementById("val-jurnal-t2q");
+const elBarT2Q = document.getElementById("bar-jurnal-t2q");
+
+if (dataBulananT2Q && elValT2Q && elBarT2Q) {
+    let target = parseInt(dataBulananT2Q.target) || 0;
+    let realisasi = parseInt(dataBulananT2Q.realisasi) || 0;
+    let persen = 0;
+    if (target > 0) persen = Math.round((realisasi / target) * 100);
+
+    elValT2Q.innerText = persen + "% (" + realisasi + "/" + target + ")";
+    elBarT2Q.style.width = persen + "%";
+} else if (elValT2Q && elBarT2Q) {
+    elValT2Q.innerText = "-";
+    elBarT2Q.style.width = "0%";
+}
 
     // ==========================================
 // 1. DEFINISI ELEMEN & SUNTIK TOMBOL T2Q
