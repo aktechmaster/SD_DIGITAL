@@ -1522,48 +1522,23 @@ async function bukaLaporan() {
         }
     }
 
-    // ==========================================
-// 1. DEFINISI ELEMEN & SUNTIK TOMBOL T2Q
+    
 // ==========================================
-// Menyiapkan variabel elValBulananT2Q agar tidak 'not defined'
-const elValBulananT2Q = document.getElementById('val-jurnal-t2q') || document.querySelector('.card-item-t2q'); 
-
-if (elValBulananT2Q) {
-    const cardJurnalT2Q = elValBulananT2Q.closest('.card-item') || elValBulananT2Q;
-    if (cardJurnalT2Q && !cardJurnalT2Q.querySelector('.btn-rincian-jurnal-t2q')) {
-        const linkRincian = document.createElement('a');
-        linkRincian.className = 'btn-rincian-jurnal-t2q';
-        linkRincian.href = '#';
-        linkRincian.innerText = 'Lihat Rincian »';
-        linkRincian.style.cssText = 'color: #8e44ad; text-decoration: none; font-size: 0.9em; display: inline-block; margin-top: 10px; font-weight: bold; cursor: pointer;';
-
-        linkRincian.onclick = function(e) {
-            e.preventDefault();
-            bukaRincianJurnalT2Q();
-        };
-        cardJurnalT2Q.appendChild(linkRincian);
-    }
-}
-
-
+// FUNGSI POPUP T2Q (GLOBAL WINDOW)
 // ==========================================
-// FUNGSI BUKA & TUTUP MODAL T2Q
-// ==========================================
-function bukaRincianJurnalT2Q() {
+window.bukaRincianJurnalT2Q = function() {
     const modal = document.getElementById('modalRincianJurnalT2Q');
     const tbody = document.getElementById('tabel-body-jurnal-t2q');
     const elNama = document.getElementById('nama-guru-jurnal-t2q');
 
     if (!modal || !tbody) return;
 
-    // Ambil nama guru dari variabel aktif / localStorage
     const namaUser = (typeof namaGuru !== 'undefined' && namaGuru) 
         ? namaGuru 
         : (typeof namaUserAktif !== 'undefined' ? namaUserAktif : localStorage.getItem('namaGuru') || '');
     
     if (elNama) elNama.innerText = namaUser;
 
-    // Ambil data dari objek JSON Apps Script
     const sumberData = (typeof dataDariSpreadsheet !== 'undefined' && dataDariSpreadsheet) 
         ? dataDariSpreadsheet 
         : (typeof globalData !== 'undefined' ? globalData : {});
@@ -1592,12 +1567,12 @@ function bukaRincianJurnalT2Q() {
     }
 
     modal.style.display = 'block';
-}
+};
 
-function tutupRincianJurnalT2Q() {
+window.tutupRincianJurnalT2Q = function() {
     const modal = document.getElementById('modalRincianJurnalT2Q');
     if (modal) modal.style.display = 'none';
-}
+};
 
 // ==========================================
 // 3. BAGIAN PIKET
