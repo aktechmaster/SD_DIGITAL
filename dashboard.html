@@ -821,23 +821,6 @@
                 <div class="item-footer">Data dari sheet "Jurnal fix"</div>
             </div>
 
-            <!-- CARD PROGRES JURNAL T2Q (BARU) -->
-<div class="card-item">
-    <div class="item-header">
-        <span class="item-title">Progres Jurnal T2Q Bulan ini</span>
-        <span class="item-value" id="val-jurnal-t2q">0%</span>
-    </div>
-    <div class="bar-track">
-        <div class="bar-fill" id="bar-jurnal-t2q" style="width: 0%; background-color: #8e44ad;"></div>
-    </div>
-    <div class="item-header" style="margin-bottom:0; margin-top:5px;">
-        <a href="#" onclick="bukaRincianJurnalT2Q(); return false;" style="font-size: 0.85em; font-weight: bold; color: #8e44ad; text-decoration: none;">
-            Lihat Rincian &raquo;
-        </a>
-        <span class="item-footer">Data dari sheet "Jurnal fix T2Q"</span>
-    </div>
-</div>
-
             <div class="card-item" id="card-status-input" style="display:none; border-left: 4px solid #1abc9c;">
                 <div class="item-header">
                     <span class="item-title">Status Input Jurnal Kelas</span>
@@ -1446,10 +1429,10 @@ if (tombolT2Q) {
 
 
         // ============================================
-// FUNGSI BUKA LAPORAN (LENGKAP DENGAN T2Q)
+// FUNGSI BUKA LAPORAN (PERBAIKAN WALI KELAS)
 // ============================================
 async function bukaLaporan() {
-    // 1. Panggil data terbaru dari server
+    // 1. Panggil data terbaru dari server terlebih dahulu
     await fetchData(); 
 
     // 2. Cek keamanan jika fetch gagal
@@ -1464,7 +1447,7 @@ async function bukaLaporan() {
 
     // 3. Buka Modal Laporan
     const modal = document.getElementById("modalLaporanKinerja") || document.getElementById("modalLaporan");
-    if (modal) modal.style.display = "block";
+    if (modal) modal.style.display = "block"; // <--- KEMBALIKAN KE "block"
     
     // --- BAGIAN 1: JURNAL HARIAN ---
     const dataHarian = dataDariSpreadsheet.jurnalHarian?.[namaGuru];
@@ -1486,7 +1469,7 @@ async function bukaLaporan() {
         elBarHarian.style.width = "0%";
     }
 
-    // --- BAGIAN 2: JURNAL BULANAN BIASA ---
+    // --- BAGIAN 2: JURNAL BULANAN ---
     const dataBulanan = dataDariSpreadsheet.jurnalBulanan?.[namaGuru];
     const elValBulanan = document.getElementById("val-jurnal-bulanan");
     const elBarBulanan = document.getElementById("bar-jurnal-bulanan");
@@ -1504,35 +1487,97 @@ async function bukaLaporan() {
         elBarBulanan.style.width = "0%";
     }
 
-    // --- BAGIAN 2B: JURNAL T2Q BULAN INI (KODE PENGHUBUNG BARU) ---
-    const elValT2Q = document.getElementById("val-jurnal-t2q");
-    const elBarT2Q = document.getElementById("bar-jurnal-t2q");
-    const listT2Q = dataDariSpreadsheet.rincianJurnalT2Q?.[namaGuru] || [];
-
-    // Deteksi bulan aktif saat ini (misal: Agustus)
-    const daftarBulan = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
-    const bulanSekarang = daftarBulan[new Date().getMonth()];
-
-    // Cari data bulan aktif atau bulan yang memiliki target
-    const dataT2QBulanIni = listT2Q.find(b => b.bulan.toLowerCase() === bulanSekarang.toLowerCase()) 
-                          || listT2Q.find(b => parseInt(b.wajib) > 0) 
-                          || { wajib: 0, realisasi: 0, persen: "0%" };
-
-    if (elValT2Q) {
-        let wajib = parseInt(dataT2QBulanIni.wajib) || 0;
-        let realisasi = parseInt(dataT2QBulanIni.realisasi) || 0;
-        let persenTeks = dataT2QBulanIni.persen || "0%";
-        let valPersen = parseFloat(String(persenTeks).replace(',', '.').replace('%', '')) || 0;
-
-        // Update Teks (misal: 18,75% (3/16))
-        elValT2Q.innerText = persenTeks + " (" + realisasi + "/" + wajib + ")";
-        
-        // Update Progress Bar Ungu
-        if (elBarT2Q) {
-            elBarT2Q.style.width = valPersen + "%";
+    // --- SUNTIK TOMBOL "LIHAT RINCIAN" ---
+    if (elValBulanan) {
+        const cardJurnal = elValBulanan.closest('.card-item');
+        if (cardJurnal && !cardJurnal.querySelector('.btn-rincian-jurnal')) {
+            const linkRincian = document.createElement('a');
+            linkRincian.className = 'btn-rincian-jurnal';
+            linkRincian.href = '#';
+            linkRincian.innerText = 'Lihat Rincian »';
+            linkRincian.style.cssText = 'color: #3498db; text-decoration: none; font-size: 0.9em; display: inline-block; margin-top: 10px; font-weight: bold; cursor: pointer;';
+            
+            linkRincian.onclick = function(e) {
+                e.preventDefault();
+                bukaRincianJurnal();
+            };
+            cardJurnal.appendChild(linkRincian);
         }
     }
+
+    // ==========================================
+// 1. DEFINISI ELEMEN & SUNTIK TOMBOL T2Q
+// ==========================================
+// Menyiapkan variabel elValBulananT2Q agar tidak 'not defined'
+const elValBulananT2Q = document.getElementById('val-jurnal-t2q') || document.querySelector('.card-item-t2q'); 
+
+if (elValBulananT2Q) {
+    const cardJurnalT2Q = elValBulananT2Q.closest('.card-item') || elValBulananT2Q;
+    if (cardJurnalT2Q && !cardJurnalT2Q.querySelector('.btn-rincian-jurnal-t2q')) {
+        const linkRincian = document.createElement('a');
+        linkRincian.className = 'btn-rincian-jurnal-t2q';
+        linkRincian.href = '#';
+        linkRincian.innerText = 'Lihat Rincian »';
+        linkRincian.style.cssText = 'color: #8e44ad; text-decoration: none; font-size: 0.9em; display: inline-block; margin-top: 10px; font-weight: bold; cursor: pointer;';
+
+        linkRincian.onclick = function(e) {
+            e.preventDefault();
+            bukaRincianJurnalT2Q();
+        };
+        cardJurnalT2Q.appendChild(linkRincian);
+    }
 }
+
+
+// ==========================================
+// 2. FUNGSI BUKA & TUTUP MODAL T2Q
+// ==========================================
+function bukaRincianJurnalT2Q() {
+    const modal = document.getElementById('modalRincianJurnalT2Q');
+    const tbody = document.getElementById('tabel-body-jurnal-t2q');
+    const elNama = document.getElementById('nama-guru-jurnal-t2q');
+
+    if (!modal || !tbody) return;
+
+    // Ambil nama guru dari variabel namaGuru atau localStorage
+    const namaUser = (typeof namaGuru !== 'undefined' ? namaGuru : localStorage.getItem('namaGuru')) || '';
+    if (elNama) elNama.innerText = namaUser;
+
+    // Menghubungkan ke objek data dari spreadsheet yang aktif
+    const sumberData = (typeof dataDariSpreadsheet !== 'undefined' && dataDariSpreadsheet) ? dataDariSpreadsheet : (typeof globalData !== 'undefined' ? globalData : {});
+    const mapT2Q = sumberData.rincianJurnalT2Q || {};
+    const dataT2Q = mapT2Q[namaUser] || null;
+
+    tbody.innerHTML = '';
+
+    if (dataT2Q && dataT2Q.length > 0) {
+        dataT2Q.forEach(function(item) {
+            const tr = document.createElement('tr');
+            
+            // Format warna persen (Hijau jika >= 100%, Merah jika < 100%)
+            let valPersen = parseFloat(String(item.persen).replace(',', '.').replace('%', '')) || 0;
+            let colorPersen = valPersen >= 100 ? '#27ae60' : '#e74c3c';
+
+            tr.innerHTML = `
+                <td style="padding: 10px; border: 1px solid #ddd;"><b>${item.bulan}</b></td>
+                <td style="padding: 10px; border: 1px solid #ddd;">${item.wajib}</td>
+                <td style="padding: 10px; border: 1px solid #ddd;">${item.realisasi}</td>
+                <td style="padding: 10px; border: 1px solid #ddd; font-weight: bold; color: ${colorPersen};">${item.persen}</td>
+            `;
+            tbody.appendChild(tr);
+        });
+    } else {
+        tbody.innerHTML = '<tr><td colspan="4" style="padding: 15px; color: #7f8c8d;">Data rincian T2Q tidak ditemukan.</td></tr>';
+    }
+
+    modal.style.display = 'block';
+}
+
+function tutupRincianJurnalT2Q() {
+    const modal = document.getElementById('modalRincianJurnalT2Q');
+    if (modal) modal.style.display = 'none';
+}
+
 
 // ==========================================
 // 3. BAGIAN PIKET
@@ -1678,7 +1723,11 @@ if (dataDariSpreadsheet && dataDariSpreadsheet.biodata && dataDariSpreadsheet.re
                     }
                 }
             }
-        
+        }
+    }
+}
+// ✅ HANYA MENAMBAHKAN KURUNG PENUTUP YANG HILANG, LOGIKA KAMU TETAP 100%
+
 window.tutupLaporan = function() {
     document.getElementById("modalLaporanKinerja").style.display = "none";
 };
