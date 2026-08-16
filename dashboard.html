@@ -1446,7 +1446,7 @@ if (tombolT2Q) {
 
 
         // ============================================
-// FUNGSI BUKA LAPORAN
+// FUNGSI BUKA LAPORAN (FIX KELENGKAPAN RINCIAN)
 // ============================================
 async function bukaLaporan() {
     // 1. Panggil data terbaru dari server
@@ -1486,7 +1486,7 @@ async function bukaLaporan() {
         elBarHarian.style.width = "0%";
     }
 
-    // --- BAGIAN 2: JURNAL BULANAN ---
+    // --- BAGIAN 2: JURNAL BULANAN REGULER ---
     const dataBulanan = dataDariSpreadsheet.jurnalBulanan?.[namaGuru];
     const elValBulanan = document.getElementById("val-jurnal-bulanan");
     const elBarBulanan = document.getElementById("bar-jurnal-bulanan");
@@ -1504,15 +1504,35 @@ async function bukaLaporan() {
         elBarBulanan.style.width = "0%";
     }
 
-    // --- BAGIAN 2B: JURNAL BULANAN T2Q (AUTO FALLBACK TO RINCIAN DATA) ---
+    // --- SUNTIK TOMBOL "LIHAT RINCIAN" JURNAL BULANAN REGULER ---
+    if (elValBulanan) {
+        const cardJurnal = elValBulanan.closest('.card-item');
+        if (cardJurnal && !cardJurnal.querySelector('.btn-rincian-jurnal')) {
+            const linkRincian = document.createElement('a');
+            linkRincian.className = 'btn-rincian-jurnal';
+            linkRincian.href = '#';
+            linkRincian.innerText = 'Lihat Rincian »';
+            linkRincian.style.cssText = 'color: #3498db; text-decoration: none; font-size: 0.9em; display: inline-block; margin-top: 10px; font-weight: bold; cursor: pointer;';
+            
+            linkRincian.onclick = function(e) {
+                e.preventDefault();
+                if (typeof bukaRincianJurnal === 'function') {
+                    bukaRincianJurnal();
+                } else if (window.bukaRincianJurnal) {
+                    window.bukaRincianJurnal();
+                }
+            };
+            cardJurnal.appendChild(linkRincian);
+        }
+    }
+
+    // --- BAGIAN 2B: JURNAL BULANAN T2Q ---
     const elValT2Q = document.getElementById("val-jurnal-t2q");
     const elBarT2Q = document.getElementById("bar-jurnal-t2q");
     
-    // Cari data dari jurnalBulananT2Q ATAU rincianJurnalT2Q bulan ini
     let dataBulananT2Q = dataDariSpreadsheet.jurnalBulananT2Q?.[namaGuru];
     
     if (!dataBulananT2Q && dataDariSpreadsheet.rincianJurnalT2Q?.[namaGuru]) {
-        // Mengambil data bulan terbaru yang memiliki realisasi/target dari array rincian
         const listRincian = dataDariSpreadsheet.rincianJurnalT2Q[namaGuru];
         const bulanAktif = listRincian.find(item => parseInt(item.wajib) > 0) || listRincian[0];
         if (bulanAktif) {
